@@ -5,7 +5,6 @@ services:
     container_name: eCLIP_ENCODE
     build: .
     tty: true
-    user: "${UID}:${GID}"
     volumes:
       - ../../:/code
       - $HOME/.Xauthority:/root/.Xauthority:ro
