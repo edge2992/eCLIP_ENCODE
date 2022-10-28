@@ -4,8 +4,8 @@ services:
   bio:
     container_name: eCLIP_ENCODE
     build: .
+    image: edge299218/deeptools:v0.0.0
     tty: true
-    user: $UID:$GID
     volumes:
       - ../../:/code
       - $HOME/.Xauthority:/root/.Xauthority:ro

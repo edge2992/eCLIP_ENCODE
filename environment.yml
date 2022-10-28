@@ -1,0 +1,9 @@
+name: hoge
+channels:
+  - bioconda
+  - conda-forge
+  - default
+dependencies:
+  - python==3.7.*
+  - pip
+  - deeptools==3.5.1
