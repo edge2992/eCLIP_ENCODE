@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  bio:
+    container_name: eCLIP_ENCODE
+    build: .
+    tty: true
+    user: $UID:$GID
+    volumes:
+      - ../../:/code
+      - $HOME/.Xauthority:/root/.Xauthority:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DISPLAY=$DISPLAY
+    command: ["/bin/bash"]
+
+
