@@ -61,8 +61,8 @@ if __name__ == "__main__":
         "assay_title": "eCLIP",
         "assembly": "GRCh38",
         "status": "released",
-        "file_format": "bigBed",
-        "file_type": "bigBed+narrowPeak",
+        "file_format_type": "narrowPeak",
+        "file_type": "bed+narrowPeak",
         # "target.label": "AQR",
         "limit": "all",
     }
