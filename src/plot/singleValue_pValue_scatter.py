@@ -1,46 +1,15 @@
 # %%
 import pandas as pd
 import os
+import sys
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
+sys.path.append(PROJECT_PATH)
+from src.plot.util.bedfile import read_eCLIP_bed, get_file_path
+
 # %%
-def read_eCLIP_bed(filename):
-    """eCLIPのbedfileにcolumn名を付けて読み込む"""
-    columns = [
-        "chrom",
-        "chromStart",
-        "chromEnd",
-        "name",
-        "score",
-        "strand",
-        "singleValue",
-        "pValue",
-        "qValue",
-        "peak",
-    ]
-    df = pd.read_table(filename, names=columns)
-    return df
-
-
-def count_file_length(filename):
-    """ファイルの行数を数える"""
-    print(filename)
-    with open(filename, "r") as f:
-        return len(f.readlines())
-
-
-def get_file_path(row: pd.Series):
-    """report.tsvの行からファイルのパスを取得する"""
-    return os.path.join(
-        PROJECT_PATH,
-        "data",
-        row["Assay term name"],
-        row["Target label"],
-        row["Biosample name"].split()[0],  # adrenal gland, K562, HepG2
-        row["Accession"] + ".bed",
-    )
 
 
 # report.tsvを読み取って、ファイルの対応関係を作る
