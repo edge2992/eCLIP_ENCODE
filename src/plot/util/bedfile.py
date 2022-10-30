@@ -24,7 +24,6 @@ def read_eCLIP_bed(filename):
 
 def count_file_length(filename):
     """ファイルの行数を数える"""
-    print(filename)
     with open(filename, "r") as f:
         return len(f.readlines())
 
