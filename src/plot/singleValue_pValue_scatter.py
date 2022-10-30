@@ -85,7 +85,8 @@ def plot_singleValue_pValue_scatter(gene: str, report: pd.DataFrame):
             ax.set_xlabel("singleValue")
             ax.set_ylabel("pvalue (-log10)")
             ax.set_xlim(-1, 10)
-            ax.set_ylim(1e-3, 1e2)
+            ax.set_ylim(1e-4, 1e3)
+            ax.set_yscale("log")
     return fig
 
 
@@ -96,6 +97,7 @@ fig = plot_singleValue_pValue_scatter(gene, report)
 
 # %%
 # 描画
+# FXR2, HNRNPKで失敗している (全体をざっくりみたいだけなので無視)
 
 SAVE_IMG_DIR = os.path.join(
     PROJECT_PATH, "src", "plot", "img", "singleValue_pValue_scatter"
@@ -113,5 +115,3 @@ for gene in tqdm(report["Target label"].unique()):
         print(gene + " is failed")
         print(e)
         continue
-
-# %%
