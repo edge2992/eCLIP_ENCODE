@@ -14,6 +14,7 @@ PROJECT_PATH = os.environ["PROJECT_PATH"]
 sys.path.append(PROJECT_PATH)
 from src.util.bedfile import (
     COLUMN_BED_NARROW_PEAK,
+    COLUMN_INTENDED_ATTRIBUTES,
     load_report,
     read_intersected_bed,
     transform_attribute_to_dict,
@@ -26,7 +27,6 @@ def _format_gene_binding_sites(
     intersected: pd.DataFrame, how=FormatStrategy.MAX
 ) -> pd.DataFrame:
     """eCLIPのannotated peakを遺伝子ごとに整形する"""
-    COLUMNS_INTENDED_ATTRIBUTES = ["gene_id", "gene_name", "gene_type"]
     formatted_peak: pd.DataFrame
 
     if how is FormatStrategy.MAX:
@@ -40,7 +40,7 @@ def _format_gene_binding_sites(
     return pd.concat(
         [
             formatted_peak[COLUMN_BED_NARROW_PEAK],
-            attribute[COLUMNS_INTENDED_ATTRIBUTES],
+            attribute[COLUMN_INTENDED_ATTRIBUTES],
         ],
         axis=1,
     )
@@ -60,7 +60,7 @@ def format_bed(row, how):
         print("formatting: {}".format(os.path.basename(output_file)))
         intersected = read_intersected_bed(input_file)
         result = _format_gene_binding_sites(intersected, how)
-        result.to_csv(output_file, sep="\t", index=False)
+        result.to_csv(output_file, sep="\t", index=False, header=False)
 
 
 def main():
