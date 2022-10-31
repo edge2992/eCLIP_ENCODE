@@ -18,6 +18,7 @@ joblib = "*"
 autopep8 = "*"
 black = "*"
 pytest = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.8"

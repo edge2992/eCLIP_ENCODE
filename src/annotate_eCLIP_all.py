@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import sys
 import subprocess
+from typing import Union
 
 sys.path.append("/mnt/H/MYWORK/eCLIP_ENCODE")
 from src.plot.util.bedfile import PROJECT_PATH, get_file_path, load_report
@@ -12,7 +13,7 @@ from src.plot.util.bedfile import PROJECT_PATH, get_file_path, load_report
 GENE_GTF_PATH = "/home/edge2992/Resource/gencode.v24.annotation.gene.gtf"
 
 
-def intersect_bed(input_file: str, output_file: str) -> subprocess.Popen:
+def intersect_bed(input_file: str, output_file: str) -> Union[subprocess.Popen, None]:
     """intersectBedを使って、bedファイルをgtfファイルとintersectする"""
     dirpath = os.path.dirname(output_file)
     if os.path.exists(output_file):
