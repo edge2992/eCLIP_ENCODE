@@ -1,13 +1,13 @@
 # eCLIPのピークファイルにgtfファイルを使って、
 # そのピークがある遺伝子の情報を追加する
-import pandas as pd
 import os
 import sys
 import subprocess
 from typing import Union
 
 sys.path.append("/mnt/H/MYWORK/eCLIP_ENCODE")
-from src.util.bedfile import PROJECT_PATH, get_file_path, load_report
+from src.util.bedfile import load_report
+from src.util.get_bed_path import get_file_path, get_annotated_file_path
 
 
 GENE_GTF_PATH = "/home/edge2992/Resource/gencode.v24.annotation.gene.gtf"
@@ -29,19 +29,6 @@ def intersect_bed(input_file: str, output_file: str) -> Union[subprocess.Popen, 
         return subprocess.Popen(cmd_intersect, shell=True, stderr=subprocess.PIPE)
 
 
-def get_output_file_path(row: pd.Series):
-    """report.tsvの行からファイルのパスを取得する"""
-    return os.path.join(
-        PROJECT_PATH,
-        "annotated_data",
-        "intersect",
-        row["Assay term name"],
-        row["Target label"],
-        row["Biosample name"].split()[0],  # adrenal gland, K562, HepG2
-        row["Accession"] + ".bed",
-    )
-
-
 def main():
     if not os.path.exists(GENE_GTF_PATH):
         print("gtf file not found : {}".format(GENE_GTF_PATH))
@@ -51,7 +38,7 @@ def main():
     # 並列実行
     for _, row in report.iterrows():
         INPUT_BED_PATH = get_file_path(row)
-        OUTPUT_BED_PATH = get_output_file_path(row)
+        OUTPUT_BED_PATH = get_annotated_file_path(row)
         proc = intersect_bed(INPUT_BED_PATH, OUTPUT_BED_PATH)
         if proc is not None:
             subprocs[row["Accession"]] = proc

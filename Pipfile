@@ -13,6 +13,7 @@ scipy = "*"
 seaborn = "*"
 tqdm = "*"
 joblib = "*"
+flake8 = "*"
 
 [dev-packages]
 flake8 = "*"

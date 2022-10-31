@@ -4,13 +4,13 @@ def test_format_peak_by_singleValue_max():
         _format_gene_binding_sites,
         FormatStrategy,
     )
-    from src.annotate_eCLIP_all import get_output_file_path
+    from src.util.get_bed_path import get_annotated_file_path
     from src.util.bedfile import load_report, read_intersected_bed
 
     T_NUM = 5
     report = load_report().head(T_NUM)
     for _, row in report.iterrows():
-        input_file = get_output_file_path(row)
+        input_file = get_annotated_file_path(row)
         intersected = read_intersected_bed(input_file)
         result = _format_gene_binding_sites(intersected, FormatStrategy.MAX)
 

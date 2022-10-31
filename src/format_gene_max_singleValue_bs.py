@@ -4,19 +4,18 @@
 # - annotate_eCLIP_all
 import os
 import sys
-from enum import Enum
 from typing import Dict
 import pandas as pd
 from joblib import Parallel, delayed
 
 sys.path.append("/mnt/H/MYWORK/eCLIP_ENCODE")
-from src.annotate_eCLIP_all import get_output_file_path
 from src.util.bedfile import (
     COLUMN_BED_NARROW_PEAK,
-    PROJECT_PATH,
     load_report,
     read_intersected_bed,
 )
+from src.util.get_bed_path import get_annotated_file_path, get_formatted_file_path
+from src.util.bed_format_strategy import FormatStrategy
 
 PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
 
@@ -25,10 +24,6 @@ def transform_attribute_to_dict(attribute: str) -> Dict[str, str]:
     """gtfのattributeをdictに変換する"""
     splited_attributes = [x.strip() for x in attribute.replace('"', "").split(";")[:-1]]
     return dict(map(lambda x: x.split(" "), splited_attributes))
-
-
-# use this for format_gene_binding_sites
-FormatStrategy = Enum("FormatStrategy", ["MAX"])
 
 
 def _format_gene_binding_sites(
@@ -64,23 +59,9 @@ def _format_max(intersected: pd.DataFrame):
     )
 
 
-def get_formatted_file_path(row: pd.Series, how):
-    """整形済みのファイルのパスを取得する"""
-    return os.path.join(
-        PROJECT_PATH,
-        "annotated_data",
-        "gene",
-        how.name.lower(),
-        row["Assay term name"],
-        row["Target label"],
-        row["Biosample name"].split()[0],  # adrenal gland, K562, HepG2
-        row["Accession"] + ".bed",
-    )
-
-
 def format_bed(row, how):
     """annotatedのbedfileを遺伝子ごとに整形する"""
-    input_file = get_output_file_path(row)
+    input_file = get_annotated_file_path(row)
     output_file = get_formatted_file_path(row, how)
     if os.path.exists(output_file):
         print("File exists: {}".format(output_file))

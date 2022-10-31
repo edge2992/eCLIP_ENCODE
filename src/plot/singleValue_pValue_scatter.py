@@ -7,7 +7,8 @@ from tqdm import tqdm
 
 PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
 sys.path.append(PROJECT_PATH)
-from src.util.bedfile import read_eCLIP_bed, get_file_path
+from src.util.bedfile import read_eCLIP_bed
+from src.util.get_bed_path import get_file_path
 
 # %%
 
@@ -19,6 +20,8 @@ report.sort_values("Biological replicates", inplace=True)
 # %%
 # singleValueとpValueの散布図を作成する
 # plot
+
+
 def plot_singleValue_pValue_scatter(gene: str, report: pd.DataFrame):
     """遺伝子ごとにsingleValueとpValueの散布図を作成する"""
     # assay_title = "eCLIP"
