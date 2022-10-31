@@ -4,7 +4,6 @@ import pandas as pd
 import os
 import sys
 import seaborn as sns
-from tqdm import tqdm
 from dotenv import load_dotenv
 
 
@@ -14,48 +13,10 @@ sys.path.append(PROJECT_PATH)
 from src.util.bed_format_strategy import FormatStrategy
 from src.util.bedfile import count_gene_nunique
 from src.util.get_bed_path import get_formatted_file_path
-
-# %%
-
-
-def calc_all_binding_count(report: pd.DataFrame):
-    """全ての遺伝子の結合部位の数を取得する"""
-    """ dict gene -> -> biosample -> accession"""
-    genes = report["Target label"].unique()
-    d = {}
-    for gene in tqdm(genes):
-        report_ex = report[report["Target label"] == gene]
-        biosamples = report_ex["Biosample name"].unique()
-        dfs = {}
-        for sample in biosamples:
-            report_ex_sample = report_ex[report_ex["Biosample name"] == sample]
-            dd = {}
-            for _, row in report_ex_sample.iterrows():
-                label = row["Accession"]
-
-                dd[label] = count_gene_nunique(
-                    get_formatted_file_path(row, FormatStrategy.MAX)
-                )
-            dfs[sample] = dd
-        d[gene] = dfs
-    return d
-
-
-def format_N_binding_per_experiment(report: pd.DataFrame):
-    """実験ごとに結合部位の数を整形する"""
-    result = calc_all_binding_count(report)
-    dd = {}
-    for dataset in report["Dataset"].unique():
-        sample_ex = report[report["Dataset"] == dataset]
-        assert len(sample_ex["Target label"].unique()) == 1
-        gene = sample_ex["Target label"].unique()[0]
-        d = {}
-        for _, row in sample_ex.iterrows():
-            label = "replicates_{}".format(row["Biological replicates"])
-            d[label] = result[gene][row["Biosample name"]][row["Accession"]]
-        dd[dataset] = d
-    return pd.DataFrame(dd).T
-
+from src.plot.util.count_by_accession import (
+    convert_gene_biosample_accession_count_dict_to_df,
+    create_gene_biosample_accession_count_dict,
+)
 
 # %%
 # report.tsvを読み取って、ファイルの対応関係を作る
@@ -65,14 +26,22 @@ report.sort_values("Biological replicates", inplace=True)
 
 # %%
 # 実験ごとに結合部位の数を数える
-count_binding = format_N_binding_per_experiment(report)
+count_gene = convert_gene_biosample_accession_count_dict_to_df(
+    create_gene_biosample_accession_count_dict(
+        report,
+        lambda row: count_gene_nunique(
+            get_formatted_file_path(row, FormatStrategy.MAX)
+        ),
+    ),
+    report,
+)
 # %%
-count_binding.head()
+count_gene.head()
 
 # %%
 # 描画
 # 細胞株（実験前提）ごとに色分けしたい
-data = count_binding.join(
+data = count_gene.join(
     report[["Dataset", "Biosample name"]].drop_duplicates().set_index("Dataset")
 )
 splot = sns.pairplot(data, hue="Biosample name")
