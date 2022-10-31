@@ -4,8 +4,11 @@ import os
 import sys
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from dotenv import load_dotenv
 
-PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
+load_dotenv()
+PROJECT_PATH = os.environ["PROJECT_PATH"]
+
 sys.path.append(PROJECT_PATH)
 from src.util.bedfile import read_eCLIP_bed
 from src.util.get_bed_path import get_file_path

@@ -5,8 +5,10 @@ import os
 import sys
 import seaborn as sns
 from tqdm import tqdm
+from dotenv import load_dotenv
 
-PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
+load_dotenv()
+PROJECT_PATH = os.environ["PROJECT_PATH"]
 sys.path.append(PROJECT_PATH)
 from src.util.bedfile import count_file_length
 from src.util.get_bed_path import get_file_path

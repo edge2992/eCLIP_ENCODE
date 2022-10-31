@@ -7,8 +7,12 @@ import sys
 from typing import Dict
 import pandas as pd
 from joblib import Parallel, delayed
+from dotenv import load_dotenv
 
-sys.path.append("/mnt/H/MYWORK/eCLIP_ENCODE")
+load_dotenv()
+PROJECT_PATH = os.environ["PROJECT_PATH"]
+
+sys.path.append(PROJECT_PATH)
 from src.util.bedfile import (
     COLUMN_BED_NARROW_PEAK,
     load_report,
@@ -16,8 +20,6 @@ from src.util.bedfile import (
 )
 from src.util.get_bed_path import get_annotated_file_path, get_formatted_file_path
 from src.util.bed_format_strategy import FormatStrategy
-
-PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
 
 
 def transform_attribute_to_dict(attribute: str) -> Dict[str, str]:

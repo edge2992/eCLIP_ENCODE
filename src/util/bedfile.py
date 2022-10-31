@@ -1,8 +1,9 @@
 import pandas as pd
 import os
+from dotenv import load_dotenv
 
-
-PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
+load_dotenv()
+PROJECT_PATH = os.environ["PROJECT_PATH"]
 
 COLUMN_BED_NARROW_PEAK = [
     "chrom",

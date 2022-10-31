@@ -4,13 +4,15 @@ import os
 import sys
 import subprocess
 from typing import Union
+from dotenv import load_dotenv
 
-sys.path.append("/mnt/H/MYWORK/eCLIP_ENCODE")
+load_dotenv()
+GENE_GTF_PATH = os.environ["GENE_GTF_PATH"]
+PROJECT_PATH = os.environ["PROJECT_PATH"]
+
+sys.path.append(PROJECT_PATH)
 from src.util.bedfile import load_report
 from src.util.get_bed_path import get_file_path, get_annotated_file_path
-
-
-GENE_GTF_PATH = "/home/edge2992/Resource/gencode.v24.annotation.gene.gtf"
 
 
 def intersect_bed(input_file: str, output_file: str) -> Union[subprocess.Popen, None]:

@@ -1,8 +1,9 @@
 import os
 import pandas as pd
+from dotenv import load_dotenv
 
-
-PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
+load_dotenv()
+PROJECT_PATH = os.environ["PROJECT_PATH"]
 
 
 def get_file_path(row: pd.Series):
