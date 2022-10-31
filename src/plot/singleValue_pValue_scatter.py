@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
 sys.path.append(PROJECT_PATH)
-from src.plot.util.bedfile import read_eCLIP_bed, get_file_path
+from src.util.bedfile import read_eCLIP_bed, get_file_path
 
 # %%
 
@@ -45,7 +45,7 @@ def plot_singleValue_pValue_scatter(gene: str, report: pd.DataFrame):
         n_col,
         figsize=(15, 7.5 * len(biosamples)),
     )
-    axes = axes.flatten()
+    axes = axes.flatten()  # type: ignore
     for i, dd in enumerate(dfs):
         for j, (label, df) in enumerate(dd.items()):
             ax = axes[i * n_col + j]

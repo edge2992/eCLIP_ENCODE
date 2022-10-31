@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
 sys.path.append(PROJECT_PATH)
-from src.plot.util.bedfile import get_file_path, count_file_length
+from src.util.bedfile import get_file_path, count_file_length
 
 # %%
 def calc_all_binding_count(report: pd.DataFrame):

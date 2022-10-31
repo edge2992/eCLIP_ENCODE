@@ -5,7 +5,7 @@ def test_format_peak_by_singleValue_max():
         FormatStrategy,
     )
     from src.annotate_eCLIP_all import get_output_file_path
-    from src.plot.util.bedfile import load_report, read_intersected_bed
+    from src.util.bedfile import load_report, read_intersected_bed
 
     T_NUM = 5
     report = load_report().head(T_NUM)

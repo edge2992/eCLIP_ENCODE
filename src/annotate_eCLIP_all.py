@@ -7,7 +7,7 @@ import subprocess
 from typing import Union
 
 sys.path.append("/mnt/H/MYWORK/eCLIP_ENCODE")
-from src.plot.util.bedfile import PROJECT_PATH, get_file_path, load_report
+from src.util.bedfile import PROJECT_PATH, get_file_path, load_report
 
 
 GENE_GTF_PATH = "/home/edge2992/Resource/gencode.v24.annotation.gene.gtf"

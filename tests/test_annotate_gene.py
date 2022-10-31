@@ -1,7 +1,7 @@
 def test_intersect_file_length():
     """bedfileが全て処理されていることを
     入力と出力のファイルの行数を比較して確認する"""
-    from src.plot.util.bedfile import load_report, count_file_length, get_file_path
+    from src.util.bedfile import load_report, count_file_length, get_file_path
     from src.annotate_eCLIP_all import get_output_file_path
     from joblib import Parallel, delayed
     import pandas as pd

@@ -11,7 +11,7 @@ from joblib import Parallel, delayed
 
 sys.path.append("/mnt/H/MYWORK/eCLIP_ENCODE")
 from src.annotate_eCLIP_all import get_output_file_path
-from src.plot.util.bedfile import (
+from src.util.bedfile import (
     COLUMN_BED_NARROW_PEAK,
     PROJECT_PATH,
     load_report,
