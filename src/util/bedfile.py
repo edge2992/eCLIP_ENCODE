@@ -57,6 +57,19 @@ def count_file_length(filename):
         return len(f.readlines())
 
 
+def count_gene_nunique(filename: str):
+    """遺伝子の種類数を数える
+
+    Args:
+        df (pd.DataFrame): format_gene_maxで生成されたbedfile
+
+    Returns:
+        _type_: _description_
+    """
+    df = read_annotated_bed(filename).dropna(axis=0, how="any")
+    return df["gene_id"].nunique()
+
+
 def load_report():
     """レポートファイルを読み込んでBiological replicatesでソートする"""
     report = pd.read_table(os.path.join(PROJECT_PATH, "data", "report.tsv"), skiprows=1)
