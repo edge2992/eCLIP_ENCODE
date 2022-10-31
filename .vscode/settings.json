@@ -21,6 +21,17 @@
         "**/.git/subtree-cache/**": true,
         "**/node_modules/*/**": true,
         "**/.hg/store/**": true,
+        "**/data/**": true,
+        "**/annotated_data/**": true,
+        ".mypy_cache/**": true,
+        ".pytest_cache/**": true,
+        "**/*.png": true,
+    },
+    "search.exclude": {
+        "*/.git": true,
+        "**/*.bed": true,
+        "**/*.bam": true,
+        "**/*.bigBed": true,
     },
     "python.testing.pytestArgs": [
         "tests"
