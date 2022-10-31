@@ -38,3 +38,10 @@ def get_file_path(row: pd.Series):
         row["Biosample name"].split()[0],  # adrenal gland, K562, HepG2
         row["Accession"] + ".bed",
     )
+
+
+def load_report():
+    """レポートファイルを読み込んでBiological replicatesでソートする"""
+    report = pd.read_table(os.path.join(PROJECT_PATH, "data", "report.tsv"), skiprows=1)
+    report.sort_values("Biological replicates", inplace=True)
+    return report
