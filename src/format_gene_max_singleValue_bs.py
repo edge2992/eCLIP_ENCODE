@@ -79,7 +79,7 @@ def format_bed(row, how):
 
 
 def main():
-    report = load_report().head()
+    report = load_report()
     how = FormatStrategy.MAX
     Parallel(n_jobs=5, verbose=3)(
         delayed(format_bed)(row, how) for _, row in report.iterrows()
