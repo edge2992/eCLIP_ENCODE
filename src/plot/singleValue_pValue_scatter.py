@@ -4,10 +4,14 @@ import os
 import sys
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from dotenv import load_dotenv
 
-PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
+load_dotenv()
+PROJECT_PATH = os.environ["PROJECT_PATH"]
+
 sys.path.append(PROJECT_PATH)
-from src.plot.util.bedfile import read_eCLIP_bed, get_file_path
+from src.util.bedfile import read_eCLIP_bed
+from src.util.get_bed_path import get_file_path
 
 # %%
 
@@ -19,6 +23,8 @@ report.sort_values("Biological replicates", inplace=True)
 # %%
 # singleValueとpValueの散布図を作成する
 # plot
+
+
 def plot_singleValue_pValue_scatter(gene: str, report: pd.DataFrame):
     """遺伝子ごとにsingleValueとpValueの散布図を作成する"""
     # assay_title = "eCLIP"
@@ -45,7 +51,7 @@ def plot_singleValue_pValue_scatter(gene: str, report: pd.DataFrame):
         n_col,
         figsize=(15, 7.5 * len(biosamples)),
     )
-    axes = axes.flatten()
+    axes = axes.flatten()  # type: ignore
     for i, dd in enumerate(dfs):
         for j, (label, df) in enumerate(dd.items()):
             ax = axes[i * n_col + j]

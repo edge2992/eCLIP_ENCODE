@@ -3,15 +3,19 @@
 import pandas as pd
 import os
 import sys
-import matplotlib.pyplot as plt
 import seaborn as sns
 from tqdm import tqdm
+from dotenv import load_dotenv
 
-PROJECT_PATH = "/mnt/H/MYWORK/eCLIP_ENCODE"
+load_dotenv()
+PROJECT_PATH = os.environ["PROJECT_PATH"]
 sys.path.append(PROJECT_PATH)
-from src.plot.util.bedfile import get_file_path, count_file_length
+from src.util.bedfile import count_file_length
+from src.util.get_bed_path import get_file_path
 
 # %%
+
+
 def calc_all_binding_count(report: pd.DataFrame):
     """全ての遺伝子の結合部位の数を取得する"""
     """ dict gene -> -> biosample -> accession"""
