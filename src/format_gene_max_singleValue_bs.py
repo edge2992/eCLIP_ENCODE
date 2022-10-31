@@ -4,7 +4,6 @@
 # - annotate_eCLIP_all
 import os
 import sys
-from typing import Dict
 import pandas as pd
 from joblib import Parallel, delayed
 from dotenv import load_dotenv
@@ -17,15 +16,10 @@ from src.util.bedfile import (
     COLUMN_BED_NARROW_PEAK,
     load_report,
     read_intersected_bed,
+    transform_attribute_to_dict,
 )
 from src.util.get_bed_path import get_annotated_file_path, get_formatted_file_path
-from src.util.bed_format_strategy import FormatStrategy
-
-
-def transform_attribute_to_dict(attribute: str) -> Dict[str, str]:
-    """gtfのattributeをdictに変換する"""
-    splited_attributes = [x.strip() for x in attribute.replace('"', "").split(";")[:-1]]
-    return dict(map(lambda x: x.split(" "), splited_attributes))
+from src.util.bed_format_strategy import FormatStrategy, format_max
 
 
 def _format_gene_binding_sites(
@@ -36,7 +30,7 @@ def _format_gene_binding_sites(
     formatted_peak: pd.DataFrame
 
     if how is FormatStrategy.MAX:
-        formatted_peak = _format_max(intersected)
+        formatted_peak = format_max(intersected)
     else:
         raise ValueError("undefined format strategy")
 
@@ -49,15 +43,6 @@ def _format_gene_binding_sites(
             attribute[COLUMNS_INTENDED_ATTRIBUTES],
         ],
         axis=1,
-    )
-
-
-def _format_max(intersected: pd.DataFrame):
-    """singleValueがmaxのbindingsiteを抽出して整形する"""
-    return (
-        intersected.sort_values("singleValue", ascending=False)
-        .drop_duplicates(["gff_seqname", "gff_start", "gff_end"], keep="first")
-        .reset_index()
     )
 
 

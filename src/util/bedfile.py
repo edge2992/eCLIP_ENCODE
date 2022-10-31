@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from dotenv import load_dotenv
+from typing import Dict
 
 load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
@@ -53,3 +54,9 @@ def load_report():
     report = pd.read_table(os.path.join(PROJECT_PATH, "data", "report.tsv"), skiprows=1)
     report.sort_values("Biological replicates", inplace=True)
     return report
+
+
+def transform_attribute_to_dict(attribute: str) -> Dict[str, str]:
+    """gtfのattributeをdictに変換する"""
+    splited_attributes = [x.strip() for x in attribute.replace('"', "").split(";")[:-1]]
+    return dict(map(lambda x: x.split(" "), splited_attributes))
