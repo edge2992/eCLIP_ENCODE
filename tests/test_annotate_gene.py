@@ -12,7 +12,8 @@ def test_intersect_file_length():
         output_file = get_annotated_file_path(row)
         return count_file_length(input_file) <= count_file_length(output_file)
 
-    report = load_report()
+    # report = load_report()
+    report = load_report().head(10)
 
     result = Parallel(n_jobs=5, verbose=3)(
         delayed(compare_file_length)(row) for _, row in report.iterrows()
