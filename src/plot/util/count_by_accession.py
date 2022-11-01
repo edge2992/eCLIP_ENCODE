@@ -1,5 +1,9 @@
 import pandas as pd
 from tqdm import tqdm
+from joblib import Parallel, delayed
+from src.util.bedfile import read_annotated_bed
+from src.util.get_bed_path import get_formatted_file_path
+from src.util.bed_format_strategy import FormatStrategy
 
 # python 3.9 is needed
 # from collections.abc import Callable
@@ -23,14 +27,39 @@ def create_gene_biosample_accession_count_dict(report: pd.DataFrame, count_metho
     return d
 
 
+def get_geneid_from_assay(row, how):
+    df = read_annotated_bed(get_formatted_file_path(row, how))
+    return df["gene_id"].dropna().unique().tolist()  # type: ignore
+
+
+def create_accession_gene_dict(report: pd.DataFrame):
+    """
+    アッセイごとにユニークなgene_idのリストを調べる
+    Dict[accession, List[gene]を作成する
+    """
+    return _create_accession_value(
+        report, lambda row: get_geneid_from_assay(row, FormatStrategy.MAX)
+    )
+
+
+def _create_accession_value(report: pd.DataFrame, process_method):
+    """rowを引数とするprocess_methodを適用して、アッセイごとになにか値を持つ辞書を作成する"""
+
+    # 並列化
+    accession_value = Parallel(n_jobs=5, verbose=3)(
+        delayed(process_method)(row) for _, row in report.iterrows()
+    )
+
+    if accession_value is None:
+        raise ValueError("accession_gene is None")
+
+    # format to dict
+    return {key: value for key, value in zip(report["Accession"], accession_value)}
+
+
 def _create_accession_count_dict(report: pd.DataFrame, count_method):
     """Accession -> count の辞書を作成する"""
-    dd = {}
-    for _, row in report.iterrows():
-        # Accessionごと
-        label = row["Accession"]
-        dd[label] = count_method(row)
-    return dd
+    return _create_accession_value(report, count_method)
 
 
 def convert_gene_biosample_accession_count_dict_to_df(

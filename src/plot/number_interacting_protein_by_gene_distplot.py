@@ -7,10 +7,10 @@ from typing import Dict, List
 import pandas as pd
 import sys
 from tqdm import tqdm
-from joblib import Parallel, delayed
 from dotenv import load_dotenv
 import seaborn as sns
 import matplotlib.pyplot as plt
+from src.plot.util.count_by_accession import create_accession_gene_dict
 
 print(os.getcwd())
 
@@ -18,36 +18,9 @@ print(os.getcwd())
 load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 sys.path.append(PROJECT_PATH)
-from src.util.bedfile import load_report, read_annotated_bed
-from src.util.bed_format_strategy import FormatStrategy
-from src.util.get_bed_path import get_formatted_file_path
+from src.util.bedfile import load_report
 
 # %%
-
-
-def get_unique_gene_list(row: pd.Series) -> List[str]:
-    """annotated bedを読み込んで、遺伝子のリストを作成する"""
-    df = read_annotated_bed(get_formatted_file_path(row, FormatStrategy.MAX))
-    return df["gene"].dropna().unique().tolist()  # type: ignore
-
-
-def create_accession_gene_dict(report: pd.DataFrame):
-    # Dict[accession, List[gene]]を作成する
-    def do_parallel(row, how):
-        df = read_annotated_bed(get_formatted_file_path(row, how))
-        label = row["Dataset"]
-        return label, df["gene_id"].dropna().unique().tolist()  # type: ignore
-
-    # 並列化
-    accession_gene = Parallel(n_jobs=5, verbose=3)(
-        delayed(do_parallel)(row, FormatStrategy.MAX) for _, row in report.iterrows()
-    )
-
-    if accession_gene is None:
-        raise ValueError("accession_gene is None")
-
-    # format to dict
-    return {key: value for key, value in accession_gene}
 
 
 def create_gene_accession_dict(accession_gene: Dict[str, List[str]]):
