@@ -13,7 +13,7 @@ sys.path.append(PROJECT_PATH)
 from src.util.bed_format_strategy import FormatStrategy
 from src.util.bedfile import count_gene_nunique
 from src.util.get_bed_path import get_formatted_file_path
-from src.plot.util.count_by_accession import (
+from src.plot.util.process_by_accession import (
     convert_gene_biosample_accession_count_dict_to_df,
     create_gene_biosample_accession_count_dict,
 )

@@ -1,7 +1,7 @@
 def test_convert_nested_dict_to_df():
     from src.util.bedfile import load_report, count_file_length
     from src.util.get_bed_path import get_file_path
-    from src.plot.util.count_by_accession import (
+    from src.plot.util.process_by_accession import (
         convert_gene_biosample_accession_count_dict_to_df,
         create_gene_biosample_accession_count_dict,
     )
@@ -22,7 +22,7 @@ def test_convert_accession_count_length_dict():
     """アッセイごとにファイル数 (ピーク数) をカウントする"""
     from src.util.bedfile import load_report, count_file_length
     from src.util.get_bed_path import get_file_path
-    from src.plot.util.count_by_accession import _create_accession_count_dict
+    from src.plot.util.process_by_accession import _create_accession_count_dict
 
     expected = {
         "ENCFF431NBT": 38156,
@@ -51,7 +51,7 @@ def test_convert_accession_count_gene_dict():
     """アッセイごとに遺伝子数をカウントする"""
     from src.util.bedfile import load_report
     from src.util.get_bed_path import get_formatted_file_path
-    from src.plot.util.count_by_accession import _create_accession_count_dict
+    from src.plot.util.process_by_accession import _create_accession_count_dict
     from src.util.bedfile import count_gene_nunique
     from src.util.bed_format_strategy import FormatStrategy
 
@@ -83,7 +83,7 @@ def test_convert_accession_count_gene_dict():
 def test_convert_accession_gene_dict():
     """アッセイごとに遺伝子のリストを作成する"""
     from src.util.bedfile import load_report
-    from src.plot.util.count_by_accession import create_accession_gene_dict
+    from src.plot.util.process_by_accession import create_accession_gene_dict
 
     expected = {
         "ENCFF431NBT": 7949,

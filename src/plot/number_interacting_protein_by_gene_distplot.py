@@ -10,7 +10,7 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 import seaborn as sns
 import matplotlib.pyplot as plt
-from src.plot.util.count_by_accession import create_accession_gene_dict
+from src.plot.util.process_by_accession import create_accession_gene_dict
 
 print(os.getcwd())
 

@@ -11,7 +11,7 @@ PROJECT_PATH = os.environ["PROJECT_PATH"]
 sys.path.append(PROJECT_PATH)
 from src.util.bedfile import count_file_length
 from src.util.get_bed_path import get_file_path
-from src.plot.util.count_by_accession import (
+from src.plot.util.process_by_accession import (
     convert_gene_biosample_accession_count_dict_to_df,
     create_gene_biosample_accession_count_dict,
 )
