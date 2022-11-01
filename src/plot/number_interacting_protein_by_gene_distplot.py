@@ -7,6 +7,7 @@ from typing import Dict, List
 import pandas as pd
 import sys
 from tqdm import tqdm
+from joblib import Parallel, delayed
 from dotenv import load_dotenv
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -23,8 +24,6 @@ from src.util.get_bed_path import get_formatted_file_path
 
 # %%
 
-# %%
-
 
 def get_unique_gene_list(row: pd.Series) -> List[str]:
     """annotated bedを読み込んで、遺伝子のリストを作成する"""
@@ -34,11 +33,21 @@ def get_unique_gene_list(row: pd.Series) -> List[str]:
 
 def create_accession_gene_dict(report: pd.DataFrame):
     # Dict[accession, List[gene]]を作成する
-    result: Dict[str, List[str]] = {}
-    for _, row in tqdm(report.iterrows()):
-        df = read_annotated_bed(get_formatted_file_path(row, FormatStrategy.MAX))
-        result[row["Dataset"]] = df["gene_id"].unique().tolist()
-    return result
+    def do_parallel(row, how):
+        df = read_annotated_bed(get_formatted_file_path(row, how))
+        label = row["Dataset"]
+        return label, df["gene_id"].dropna().unique().tolist()  # type: ignore
+
+    # 並列化
+    accession_gene = Parallel(n_jobs=5, verbose=3)(
+        delayed(do_parallel)(row, FormatStrategy.MAX) for _, row in report.iterrows()
+    )
+
+    if accession_gene is None:
+        raise ValueError("accession_gene is None")
+
+    # format to dict
+    return {key: value for key, value in accession_gene}
 
 
 def create_gene_accession_dict(accession_gene: Dict[str, List[str]]):
@@ -53,45 +62,82 @@ def create_gene_accession_dict(accession_gene: Dict[str, List[str]]):
     return result
 
 
+def count_experiments_by_gene(report: pd.DataFrame):
+    """遺伝子ごとに検出された実験数をカウントする"""
+    accession_gene = create_accession_gene_dict(report)
+    gene_accession = create_gene_accession_dict(accession_gene)
+
+    # count
+    gene_count = pd.Series(
+        {gene: len(accession_list) for gene, accession_list in gene_accession.items()}
+    ).sort_values(ascending=False)
+    return gene_count
+
+
 # %%
 report = load_report()
 
-gene_accession = create_gene_accession_dict(
-    create_accession_gene_dict(report[report["Biological replicates"] == "1,2"])
-)
+result = []
+for replicate in report["Biological replicates"].unique():
+    data = count_experiments_by_gene(
+        report[report["Biological replicates"] == replicate]  # type: ignore
+    )
+    data.name = replicate
+    result.append(data)
 
 # %%
-data = pd.Series({k: len(v) for k, v in gene_accession.items()}).sort_values(
-    ascending=False
+data = pd.DataFrame(result).fillna(0).T.add_prefix("replicate_")
+
+PLOT_DIR = os.path.join(
+    PROJECT_PATH,
+    "src",
+    "plot",
+    "img",
+    "number_interacting_protein_by_gene_distplot",
 )
-print(data.head())
+if not os.path.exists(PLOT_DIR):
+    os.makedirs(PLOT_DIR)
 
 # %%
+# 横に並べるなら軸を揃えたい
+replicate_num = data.shape[1]
 
-fig, ax = plt.subplots(figsize=(5, 5))
-fig.subplots_adjust(top=0.8, left=0.2)
+fig, axes = plt.subplots(1, replicate_num, figsize=(7 * replicate_num, 7))
+fig.subplots_adjust(bottom=0.2)
 
-sns.histplot(data, ax=ax)
+for ax, (label, values) in zip(axes, data.items()):
+    sns.histplot(values[values > 0], ax=ax)
+    ax.set_xlabel("# experiments in which the gene is detected", fontsize=14)
+    ax.set_ylabel("Counts of gene", fontsize=14)
+    ax.set_title(label, fontsize=16)  # type: ignore
+    ax.set_xlim(0, 250)
+    ax.set_ylim(0, 12000)
 
+fig.suptitle(
+    "Distribution of the number of eCLIP experiments in which the gene is detected",
+    fontsize=18,
+    y=0.1,
+)
+
+fig.savefig(os.path.join(PLOT_DIR, "compare_distplot.png"))
+
+# %%
+# replicate1,2だけを拡大して描画する
+fig, ax = plt.subplots(figsize=(8, 5))
+fig.subplots_adjust(bottom=0.3)
+
+sns.histplot(
+    data["replicate_1,2"][data["replicate_1,2"] > 0], ax=ax, label="replicate_1,2"
+)
 ax.set_xlabel("# experiments in which the gene is detected", fontsize=12)
 ax.set_ylabel("Counts of gene", fontsize=12)
-ax.set_title(
-    "The number of eCLIP experiments\n"
-    + "in which the gene was detected per gene.\n"
-    + "The total number of gene types detected was {},\n".format(len(data))
-    + "and plotted using replicate1,2.",
-    fontsize=10,
-    y=1.03,
-)
+ax.set_title("replicate_1,2", fontsize=14)  # type: ignore
 
-fig.savefig(
-    os.path.join(
-        PROJECT_PATH,
-        "src",
-        "plot",
-        "img",
-        "number_interacting_protein_by_gene_distplot.png",
-    ),
+fig.suptitle(
+    "Distribution of the number of eCLIP experiments\n in which the gene is detected",
+    fontsize=14,
+    y=0.1,
 )
+fig.savefig(os.path.join(PLOT_DIR, "replicate12_distplot.png"))
 
 # %%
