@@ -1,4 +1,14 @@
 {
+    "pythonVersion": "3.8",
+    "pythonPlatform": "Linux",
+    "executionEnvironments": [
+        {
+            "root": "."
+        }
+    ],
+    "include": [
+        "src",
+    ],
     "exclude": [
         "data",
         "annotated_data",
