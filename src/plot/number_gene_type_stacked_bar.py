@@ -5,7 +5,6 @@ import os
 from typing import Dict
 import pandas as pd
 import sys
-from joblib import Parallel, delayed
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 
@@ -18,6 +17,7 @@ sys.path.append(PROJECT_PATH)
 from src.util.bedfile import load_report, read_annotated_bed
 from src.util.bed_format_strategy import FormatStrategy
 from src.util.get_bed_path import get_formatted_file_path
+from src.plot.util.process_by_accession import _create_accession_value
 
 
 # %%
@@ -33,23 +33,16 @@ def count_gene(report: pd.DataFrame):
     """遺伝子の種類を種類ごとに数える"""
     """行がACCESSIONで, 列がgene_typeのDataFrameを返す"""
     # 並列処理
-    accession_gene = Parallel(n_jobs=5, verbose=3)(
-        delayed(count_gene_by_geneType)(row, FormatStrategy.MAX)
-        for _, row in report.iterrows()
+    result = _create_accession_value(
+        report,
+        lambda row: count_gene_by_geneType(row, FormatStrategy.MAX),
+        lambda x: (
+            x["Target label"] + " " + x["Biosample name"] + " " + x["Accession"]
+        ),  # type: ignore
     )
-    if accession_gene is None:
-        raise ValueError("accession_gene is None")
-    df = pd.DataFrame.from_dict(accession_gene)  # type: ignore
-    # labelを作る
-    labels = (
-        report["Target label"]
-        + " "
-        + report["Biosample name"]
-        + " "
-        + report["Accession"]
-    ).to_list()
-    df.index = labels  # type: ignore
-    return df
+
+    df = pd.DataFrame(result)
+    return df.T
 
 
 def squash_columns(df: pd.DataFrame, threshold: int) -> pd.DataFrame:
@@ -72,6 +65,9 @@ def split_dataframe(df: pd.DataFrame):
 # %%
 report = load_report()
 gene_count_type = count_gene(report[report["Biological replicates"] == "1,2"])
+
+# %%
+gene_count_type.head()
 # %%
 print(gene_count_type.describe())
 gene_count_type.max().sort_values(ascending=False)

@@ -42,8 +42,16 @@ def create_accession_gene_dict(report: pd.DataFrame):
     )
 
 
-def _create_accession_value(report: pd.DataFrame, process_method):
-    """rowを引数とするprocess_methodを適用して、アッセイごとになにか値を持つ辞書を作成する"""
+def _create_accession_value(
+    report: pd.DataFrame,
+    process_method,
+    label_method=lambda report: report["Accession"],
+):
+    """rowを引数とするprocess_methodを適用して、
+    アッセイごとになにか値を持つ辞書を作成する
+    process_methodは求めたい値を返す関数 (入力: アッセイ情報のrow)
+    label_methodはlabelを返す関数 (入力: report)
+    """
 
     # 並列化
     accession_value = Parallel(n_jobs=5, verbose=3)(
@@ -53,8 +61,10 @@ def _create_accession_value(report: pd.DataFrame, process_method):
     if accession_value is None:
         raise ValueError("accession_gene is None")
 
+    labels = label_method(report)
+
     # format to dict
-    return {key: value for key, value in zip(report["Accession"], accession_value)}
+    return {key: value for key, value in zip(labels, accession_value)}
 
 
 def _create_accession_count_dict(report: pd.DataFrame, count_method):
