@@ -2,7 +2,6 @@
 # 積立棒グラフで描画する
 # %%
 import os
-from typing import Dict
 import pandas as pd
 import sys
 from dotenv import load_dotenv
@@ -14,35 +13,10 @@ print(os.getcwd())
 load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 sys.path.append(PROJECT_PATH)
-from src.util.bedfile import load_report, read_annotated_bed
-from src.util.bed_format_strategy import FormatStrategy
-from src.util.get_bed_path import get_formatted_file_path
-from src.plot.util.process_by_accession import _create_accession_value
-
+from src.util.bedfile import load_report
+from src.plot.util.process_report import count_gene
 
 # %%
-
-
-def count_gene_by_geneType(row: pd.Series, how=FormatStrategy.MAX) -> Dict[str, int]:
-    """遺伝子の種類を種類ごとにDict[str, int]で返す"""
-    df = read_annotated_bed(get_formatted_file_path(row, how))
-    return df["gene_type"].dropna().value_counts().to_dict()  # type: ignore
-
-
-def count_gene(report: pd.DataFrame):
-    """遺伝子の種類を種類ごとに数える"""
-    """行がACCESSIONで, 列がgene_typeのDataFrameを返す"""
-    # 並列処理
-    result = _create_accession_value(
-        report,
-        lambda row: count_gene_by_geneType(row, FormatStrategy.MAX),
-        lambda x: (
-            x["Target label"] + " " + x["Biosample name"] + " " + x["Accession"]
-        ),  # type: ignore
-    )
-
-    df = pd.DataFrame(result)
-    return df.T
 
 
 def squash_columns(df: pd.DataFrame, threshold: int) -> pd.DataFrame:

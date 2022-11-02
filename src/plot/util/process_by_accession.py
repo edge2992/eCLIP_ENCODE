@@ -1,5 +1,6 @@
 import pandas as pd
 from tqdm import tqdm
+from typing import Dict
 from joblib import Parallel, delayed
 from src.util.bedfile import read_annotated_bed
 from src.util.get_bed_path import get_formatted_file_path
@@ -97,3 +98,9 @@ def _create_replicate_count_dict(accession_count_dict, report):
         label = "replicates_{}".format(row["Biological replicates"])
         d[label] = accession_count_dict[row["Accession"]]
     return d
+
+
+def count_gene_by_geneType(row: pd.Series, how=FormatStrategy.MAX) -> Dict[str, int]:
+    """遺伝子の種類を種類ごとにDict[str, int]で返す"""
+    df = read_annotated_bed(get_formatted_file_path(row, how))
+    return df["gene_type"].dropna().value_counts().to_dict()  # type: ignore
