@@ -83,7 +83,7 @@ def test_convert_accession_count_gene_dict():
 def test_convert_accession_gene_dict():
     """アッセイごとに遺伝子のリストを作成する"""
     from src.util.bedfile import load_report
-    from src.plot.util.process_by_accession import create_accession_gene_dict
+    from src.plot.util.process_report import get_gene_ids
 
     expected = {
         "ENCFF431NBT": 7949,
@@ -100,7 +100,7 @@ def test_convert_accession_gene_dict():
 
     TEST_DATASET_NUM = 10
     report = load_report()
-    result = create_accession_gene_dict(
+    result = get_gene_ids(
         report.head(TEST_DATASET_NUM),
     )
     assert len(result) == TEST_DATASET_NUM

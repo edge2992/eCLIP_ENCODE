@@ -1,6 +1,6 @@
 import pandas as pd
 from tqdm import tqdm
-from typing import Dict
+from typing import Callable, Dict
 from joblib import Parallel, delayed
 from src.util.bedfile import read_annotated_bed
 from src.util.get_bed_path import get_formatted_file_path
@@ -33,20 +33,12 @@ def get_geneid_from_assay(row, how):
     return df["gene_id"].dropna().unique().tolist()  # type: ignore
 
 
-def create_accession_gene_dict(report: pd.DataFrame):
-    """
-    アッセイごとにユニークなgene_idのリストを調べる
-    Dict[accession, List[gene]を作成する
-    """
-    return _create_accession_value(
-        report, lambda row: get_geneid_from_assay(row, FormatStrategy.MAX)
-    )
-
-
 def _create_accession_value(
     report: pd.DataFrame,
     process_method,
-    label_method=lambda report: report["Accession"],
+    label_method: Callable[[pd.DataFrame], pd.Series] = lambda report: report[
+        "Accession"
+    ],
 ):
     """rowを引数とするprocess_methodを適用して、
     アッセイごとになにか値を持つ辞書を作成する

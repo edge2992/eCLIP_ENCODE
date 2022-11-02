@@ -10,7 +10,7 @@ from tqdm import tqdm
 from dotenv import load_dotenv
 import seaborn as sns
 import matplotlib.pyplot as plt
-from src.plot.util.process_by_accession import create_accession_gene_dict
+from src.plot.util.process_report import get_gene_ids
 
 print(os.getcwd())
 
@@ -37,7 +37,7 @@ def create_gene_accession_dict(accession_gene: Dict[str, List[str]]):
 
 def count_experiments_by_gene(report: pd.DataFrame):
     """遺伝子ごとに検出された実験数をカウントする"""
-    accession_gene = create_accession_gene_dict(report)
+    accession_gene = get_gene_ids(report)
     gene_accession = create_gene_accession_dict(accession_gene)
 
     # count
