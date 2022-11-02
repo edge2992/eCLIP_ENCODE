@@ -40,4 +40,12 @@
     "python.testing.pytestEnabled": true,
     "python.analysis.typeCheckingMode": "basic",
     // "python.analysis.logLevel": "Trace",
+    "python.analysis.exclude": [
+        "**/_pycache__",
+        ".git",
+        "**/*.bed",
+        "**/*.png",
+        "**/*.bigBed",
+    ],
+    "python.analysis.diagnosticMode": "workspace"
 }
