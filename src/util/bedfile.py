@@ -70,7 +70,7 @@ def count_gene_nunique(filename: str):
     return df["gene_id"].nunique()
 
 
-def load_report():
+def load_report() -> pd.DataFrame:
     """レポートファイルを読み込んでBiological replicatesでソートする"""
     report = pd.read_table(os.path.join(PROJECT_PATH, "data", "report.tsv"), skiprows=1)  # type: ignore
     report.sort_values("Biological replicates", inplace=True)

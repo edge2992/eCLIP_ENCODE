@@ -27,7 +27,7 @@ report.sort_values("Biological replicates", inplace=True)
 
 count_binding = convert_gene_biosample_accession_count_dict_to_df(
     create_gene_biosample_accession_count_dict(
-        report, lambda row: count_file_length(get_file_path(row))
+        report, lambda row: count_file_length(get_file_path(row))  # type: ignore
     ),
     report,
 )

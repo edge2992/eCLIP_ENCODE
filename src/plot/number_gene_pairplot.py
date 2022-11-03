@@ -30,7 +30,7 @@ count_gene = convert_gene_biosample_accession_count_dict_to_df(
     create_gene_biosample_accession_count_dict(
         report,
         lambda row: count_gene_nunique(
-            get_formatted_file_path(row, FormatStrategy.MAX)
+            get_formatted_file_path(row, FormatStrategy.MAX)  # type: ignore
         ),
     ),
     report,
