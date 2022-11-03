@@ -1,0 +1,23 @@
+{
+    "pythonVersion": "3.8",
+    "pythonPlatform": "Linux",
+    "executionEnvironments": [
+        {
+            "root": "."
+        }
+    ],
+    "include": [
+        "src",
+    ],
+    "exclude": [
+        "data",
+        "annotated_data",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".git",
+        "**/*.bed",
+        "**/*.png",
+        "**/*.tsv",
+        "**/*.bigBed",
+    ]
+}
