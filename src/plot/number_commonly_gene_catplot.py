@@ -3,11 +3,10 @@
 
 # %%
 import os
-import numpy as np
-import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
+from src.plot.util.split import split_dataframe
 from src.plot.util.process_intersect_gene import count_interection
 from src.plot.util.process_report import label_protein_biosample
 from src.util.bedfile import load_report
@@ -16,16 +15,6 @@ load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 
 # %%
-
-
-def split_into_n(lst, n):
-    """Split the list into N pieces by splitting it from the front"""
-    return [list(tmp) for tmp in np.array_split(lst, n)]
-
-
-def split_dataframe(df: pd.DataFrame, n):
-    """Split the dataframe into N pieces by splitting it from the front"""
-    return [df.loc[tmp] for tmp in np.array_split(df.index, n)]
 
 
 # %%

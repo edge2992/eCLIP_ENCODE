@@ -6,6 +6,7 @@ import pandas as pd
 import sys
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
+from src.plot.util.split import split_dataframe
 
 print(os.getcwd())
 
@@ -29,13 +30,6 @@ def squash_columns(df: pd.DataFrame, threshold: int) -> pd.DataFrame:
     return result
 
 
-def split_dataframe(df: pd.DataFrame):
-    """split dataframe into 2 parts"""
-    n = int(df.shape[0] / 2)
-    df.sort_index(inplace=True)
-    return df.iloc[:n, :], df.iloc[n:, :]
-
-
 # %%
 report = load_report()
 gene_count_type = count_gene(report[report["Biological replicates"] == "1,2"])
@@ -47,10 +41,10 @@ print(gene_count_type.describe())
 gene_count_type.max().sort_values(ascending=False)
 
 # %%
+N_SPLIT = 2
 
-
-dfs = split_dataframe(squash_columns(gene_count_type, 20))
-fig, axes = plt.subplots(2, 1, figsize=(60, 30))
+dfs = split_dataframe(squash_columns(gene_count_type, 20), N_SPLIT)
+fig, axes = plt.subplots(N_SPLIT, 1, figsize=(30 * N_SPLIT, 30))
 fig.subplots_adjust(left=0.05, right=0.85, bottom=0.2, hspace=0.8)
 for ax, data in zip(axes, dfs):
     data.plot(kind="bar", stacked=True, ax=ax, fontsize=20)
