@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def test_convert_nested_dict_to_df():
     from src.util.bedfile import load_report, count_file_length
     from src.util.get_bed_path import get_file_path
@@ -54,6 +57,7 @@ def test_convert_accession_count_gene_dict():
     from src.plot.util.process_by_accession import _create_accession_count_dict
     from src.util.bedfile import count_gene_nunique
     from src.util.bed_format_strategy import FormatStrategy
+    from src.plot.util.process_report import count_gene
 
     expected = {
         "ENCFF431NBT": 7949,
@@ -78,6 +82,13 @@ def test_convert_accession_count_gene_dict():
     assert len(result) == TEST_DATASET_NUM
     for key, value in result.items():
         assert value == expected[key]
+    # count_geneで同じ計算ができる
+    result2: pd.Series[str] = count_gene(
+        report.head(TEST_DATASET_NUM), lambda row: row["Accession"]
+    )
+    assert len(result2) == TEST_DATASET_NUM
+    for key, value in result2.items():
+        assert value == expected[str(key)]
 
 
 def test_convert_accession_gene_dict():

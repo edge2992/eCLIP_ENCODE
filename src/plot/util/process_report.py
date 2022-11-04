@@ -7,6 +7,8 @@ from src.plot.util.process_by_accession import (
     count_gene_by_geneType,
     get_geneid_from_assay,
 )
+from src.util.bedfile import read_annotated_bed
+from src.util.get_bed_path import get_formatted_file_path
 
 
 def label_full(report: pd.DataFrame):
@@ -23,7 +25,7 @@ def label_protein_biosample(report: pd.DataFrame) -> pd.Series:
     return report["Target label"] + " " + report["Biosample name"]
 
 
-def count_gene(
+def count_gene_type(
     report: pd.DataFrame, label_method: Callable[[pd.DataFrame], pd.Series] = label_full
 ) -> pd.DataFrame:
     """遺伝子の種類を種類ごとに数える"""
@@ -37,6 +39,26 @@ def count_gene(
 
     df = pd.DataFrame(result)
     return df.T
+
+
+def count_gene(
+    report: pd.DataFrame, label_method: Callable[[pd.DataFrame], pd.Series] = label_full
+) -> pd.Series:
+    """遺伝子の種類を数える"""
+    """行がACCESSIONで, 列がgene_typeのDataFrameを返す"""
+
+    def _count_gene(row: pd.Series, how=FormatStrategy.MAX) -> int:
+        """遺伝子の数を返す"""
+        df = read_annotated_bed(get_formatted_file_path(row, how))
+        return len(df["gene_id"].dropna().unique().tolist())  # type: ignore
+
+    # 並列処理
+    result = _create_accession_value(
+        report,
+        lambda row: _count_gene(row, FormatStrategy.MAX),
+        label_method,
+    )
+    return pd.Series(result)
 
 
 def get_gene_ids(

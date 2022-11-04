@@ -15,7 +15,7 @@ load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 sys.path.append(PROJECT_PATH)
 from src.util.bedfile import load_report
-from src.plot.util.process_report import count_gene
+from src.plot.util.process_report import count_gene_type
 
 # %%
 
@@ -32,7 +32,7 @@ def squash_columns(df: pd.DataFrame, threshold: int) -> pd.DataFrame:
 
 # %%
 report = load_report()
-gene_count_type = count_gene(report[report["Biological replicates"] == "1,2"])
+gene_count_type = count_gene_type(report[report["Biological replicates"] == "1,2"])
 
 # %%
 gene_count_type.head()
