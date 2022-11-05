@@ -1,6 +1,7 @@
 # レポートを処理して、描画しやすいデータを返す関数を定義する
 from typing import Callable
 import pandas as pd
+import itertools
 from src.util.bed_format_strategy import FormatStrategy
 from src.plot.util.process_by_accession import (
     _create_accession_value,
@@ -73,3 +74,7 @@ def get_gene_ids(
     return _create_accession_value(
         report, lambda row: get_geneid_from_assay(row, FormatStrategy.MAX), label_method
     )
+
+
+def gene_ids_eCLIP(report: pd.DataFrame):
+    return list(set(itertools.chain.from_iterable(get_gene_ids(report).values())))
