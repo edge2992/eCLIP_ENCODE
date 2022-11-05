@@ -1,23 +1,18 @@
-def test_load():
-    """load_protein_sequence_similarityのテスト"""
-    from src.util.similarity import load_protein_sequence_similarity
-
-    df = load_protein_sequence_similarity()
-    assert df.shape[0] == df.shape[1]
-    # -nanがどうなっているかを確認する
-    print("nan", df.loc["SLTM", "PUS1"])
-
-
 def test_load_label():
     """report.txtとsimilarity_matrixのラベル (タンパク質) が一致する"""
-    from src.util.bedfile import load_report
+    """load_protein_sequence_similarityのテスト"""
     from src.util.similarity import load_protein_sequence_similarity
+    from src.util.bedfile import load_replicateIDR_report
 
     df = load_protein_sequence_similarity()
-    expected = list(load_report()["Target label"].unique())
+    expected = load_replicateIDR_report()["Target label"].unique().tolist()
+    assert df.shape[0] == df.shape[1]
     assert len(df.columns) == len(expected)
-    for rbp in df.columns:
-        assert rbp in expected
+    for protein in expected:
+        assert protein in df.columns
+        assert protein in df.index
+    data = df.to_numpy()
+    assert (data == data.T).reshape(-1).all(), "対称行列である"
 
 
 def test_lift_protein():

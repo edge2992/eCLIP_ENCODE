@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from typing import Dict
 
-from util.gtffile import COLUMN_ENSEMBL_GTF
+from src.util.gtffile import COLUMN_ENSEMBL_GTF
 
 load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]

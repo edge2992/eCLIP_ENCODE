@@ -1,5 +1,5 @@
 import os
-from typing import Callable, List
+from typing import Callable, Dict, List
 import pandas as pd
 from dotenv import load_dotenv
 from src.plot.util.process_intersect_gene import count_interection
@@ -8,10 +8,12 @@ from src.plot.util.process_report import (
     gene_ids_eCLIP,
     label_protein_biosample,
 )
+from src.util.uniprot import idmapping
 
 load_dotenv()
 
 PROJECT_PATH = os.environ["PROJECT_PATH"]
+CLUSTALO_DISTMAT_PATH = os.environ["CLUSTALO_DISTMAT_PATH"]
 
 
 def similarity_set(gene_list1, gene_list2):
@@ -22,26 +24,24 @@ def similarity_set(gene_list1, gene_list2):
 
 def load_protein_sequence_similarity():
     # clustal Omegaのpercent identity Matrixを読み取って、pd.DataFrameにする
-    def get_protein_name(label: str):
-        return label.split("|")[2].split("_")[0]
-
-    OMEGA_SIM_MATRIX_PATH = os.path.join(
-        PROJECT_PATH, "data", "eCLIP_clustal_omega_identity_matrix.pim"
-    )
-
     similarities: List[List[str]] = []
     labels: List[str] = []
-    with open(OMEGA_SIM_MATRIX_PATH, "r") as f:
+    mapping_dict: Dict[str, str] = {value: key for key, value in idmapping().items()}
+    with open(CLUSTALO_DISTMAT_PATH, "r") as f:
         lines = f.readlines()
-        for line in lines:
+        for line in lines[1:]:
             if line.startswith("#"):
                 continue
             elif line == "\n":
                 continue
             else:
-                similarities.append(line.split()[2:])
-                labels.append(get_protein_name(line.split()[1]))
-    df = pd.DataFrame(similarities, index=labels, columns=labels, dtype=float)
+                similarities.append(line.split()[1:])
+                labels.append(line.split()[0])
+    df = (
+        pd.DataFrame(similarities, index=labels, columns=labels, dtype=float)
+        .loc[list(mapping_dict.keys()), list(mapping_dict.keys())]
+        .rename(index=mapping_dict, columns=mapping_dict)
+    )
     return df
 
 
@@ -63,5 +63,9 @@ def lift_protein(
     columns = intersect.columns
 
     gene_value = gene[columns].to_numpy()
-    value = intersect.to_numpy() / (gene_value * gene_value.reshape((-1, 1))) * all_gene_count
+    value = (
+        intersect.to_numpy()
+        / (gene_value * gene_value.reshape((-1, 1)))
+        * all_gene_count
+    )
     return pd.DataFrame(value, index=columns, columns=columns)
