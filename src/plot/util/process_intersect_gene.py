@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from src.plot.util.process_report import (
-    count_gene,
+    count_gene_type,
     get_gene_ids,
     label_protein_biosample,
 )
@@ -38,7 +38,7 @@ def assay_with_many_gene(
     prepare_label: Callable[[pd.DataFrame], pd.Series] = lambda x: x["Accession"],
 ) -> List[str]:
     """遺伝子数が多いアッセイを取得する"""
-    data: pd.Series[int] = count_gene(report, prepare_label).sum(axis=1)
+    data: pd.Series[int] = count_gene_type(report, prepare_label).sum(axis=1)
     intended_indexes: List[str] = sorted(list(data[data > threshold].index))
     print("{} -> {}".format(data.shape[0], len(intended_indexes)))
     return intended_indexes

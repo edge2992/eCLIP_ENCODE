@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 from typing import Dict
 
+from src.util.gtffile import COLUMN_ENSEMBL_GTF
+
 load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 
@@ -19,17 +21,6 @@ COLUMN_BED_NARROW_PEAK = [
     "peak",
 ]
 
-COLUMN_ENSEMBL_GFF = [
-    "seqname",
-    "source",
-    "feature",
-    "start",
-    "end",
-    "score",
-    "strand",
-    "frame",
-    "attribute",
-]
 
 COLUMN_INTENDED_ATTRIBUTES = ["gene_id", "gene_name", "gene_type"]
 
@@ -41,7 +32,7 @@ def read_eCLIP_bed(filename: str) -> pd.DataFrame:
 
 def read_intersected_bed(filename: str) -> pd.DataFrame:
     """intersectBedで追加されたcolumnを読み込む"""
-    column = COLUMN_BED_NARROW_PEAK + ["gff_" + column for column in COLUMN_ENSEMBL_GFF]
+    column = COLUMN_BED_NARROW_PEAK + ["gff_" + column for column in COLUMN_ENSEMBL_GTF]
     return pd.read_table(filename, names=column)
 
 
@@ -70,11 +61,16 @@ def count_gene_nunique(filename: str):
     return df["gene_id"].nunique()
 
 
-def load_report():
+def load_report() -> pd.DataFrame:
     """レポートファイルを読み込んでBiological replicatesでソートする"""
     report = pd.read_table(os.path.join(PROJECT_PATH, "data", "report.tsv"), skiprows=1)  # type: ignore
     report.sort_values("Biological replicates", inplace=True)
     return report
+
+
+def load_replicateIDR_report() -> pd.DataFrame:
+    report = load_report()
+    return report[report["Biological replicates"] == "1,2"]
 
 
 def transform_attribute_to_dict(attribute: str) -> Dict[str, str]:
