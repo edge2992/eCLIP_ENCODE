@@ -15,6 +15,8 @@ tqdm = "*"
 joblib = "*"
 flake8 = "*"
 python-dotenv = "*"
+torch = "*"
+tape-proteins = "*"
 
 [dev-packages]
 flake8 = "*"
