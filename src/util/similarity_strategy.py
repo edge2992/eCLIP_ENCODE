@@ -1,11 +1,14 @@
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Union
+from itertools import chain
+from typing import Callable, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
+from tqdm import tqdm
 
+from src.plot.util.process_report import label_protein_biosample
 
 load_dotenv()
 
@@ -66,49 +69,77 @@ class SequenceSimilarityStrategy(SimilarityStrategy):
 
 
 class InteractionSimilarityStrategy(SimilarityStrategy):
+    _interaction_intersection: Union[None, pd.DataFrame] = None
+    _interaction_union: Union[None, pd.DataFrame] = None
+    _accession_genes: Union[None, Dict[str, List[str]]] = None
+    _nunique_gene: Union[None, int] = None
+
     def __init__(
         self,
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
+        label_method: Callable[[pd.DataFrame], pd.Series] = label_protein_biosample,
     ):
         super().__init__(report)
         self.loadfile = loadfile
+        self.label_method = label_method
 
-    def _load_count_data(self):
+    @property
+    def accession_genes(self) -> Dict[str, List[str]]:
         # 相互作用数と遺伝子数をそれぞれ読み込む
-        # TODO: hash化してキャッシュしたい
-        # DataFrameがhash化出来ない
-        # そこまで重い処理でもないので、一旦保留
-        # @lru_cache(maxsize=5)
+
         def cached_load(
             report: pd.DataFrame,
-        ) -> Tuple[np.ndarray, np.ndarray, List[str], int]:
-            from src.plot.util.process_intersect_gene import count_interection
-            from src.plot.util.process_report import (
-                count_gene,
-                gene_ids_eCLIP,
-                label_protein_biosample,
-            )
+        ) -> Dict[str, List[str]]:
+            from src.plot.util.process_report import get_gene_ids
 
-            label_method = label_protein_biosample
-
-            # todo typo
-            interaction_intersect: pd.DataFrame = count_interection(
-                report, label_method
+            accession_genes: Dict[str, List[str]] = get_gene_ids(
+                report, self.label_method
             )
-            rbp_columns: List[str] = list(interaction_intersect.columns)
-            rbp_interaction: pd.Series = count_gene(report, label_method)[rbp_columns]
-            nunique_gene = len(gene_ids_eCLIP(report))
-            assert len(rbp_interaction) == len(rbp_columns)
-            assert (rbp_interaction.index == rbp_columns).all()
-            return (
-                interaction_intersect.to_numpy(),
-                rbp_interaction.to_numpy(),
-                rbp_columns,
-                nunique_gene,
-            )
+            return accession_genes
 
-        return cached_load(self.report)
+        if not isinstance(self._accession_genes, dict):
+            self._accession_genes = cached_load(self.report)
+
+        return self._accession_genes
+
+    @property
+    def interaction_intersection(self) -> pd.DataFrame:
+        if self._interaction_intersection is None:
+            data = pd.DataFrame(
+                columns=list(self.accession_genes.keys()),
+                index=list(self.accession_genes.keys()),
+                dtype=int,
+            )
+            for (k1, v1) in tqdm(self.accession_genes.items()):
+                for (k2, v2) in self.accession_genes.items():
+                    data.loc[k1, k2] = len(set(v1) & set(v2))
+            self._interaction_intersection = data
+        return self._interaction_intersection
+
+    @property
+    def interaction_union(self) -> pd.DataFrame:
+        if self._interaction_union is None:
+            data = pd.DataFrame(
+                columns=list(self.accession_genes.keys()),
+                index=list(self.accession_genes.keys()),
+                dtype=int,
+            )
+            for (k1, v1) in tqdm(self.accession_genes.items()):
+                for (k2, v2) in self.accession_genes.items():
+                    data.loc[k1, k2] = len(set(v1) | set(v2))
+            self._interaction_union = data
+        return self._interaction_union
+
+    @property
+    def rbp_interaction_count(self) -> pd.Series:
+        return pd.Series({k: len(v) for (k, v) in self.accession_genes.items()})
+
+    @property
+    def nunique_gene(self) -> int:
+        if self._nunique_gene is None:
+            self._nunique_gene = len(set(chain(*self.accession_genes.values())))
+        return self._nunique_gene
 
 
 class MSA(SequenceSimilarityStrategy):
@@ -183,37 +214,82 @@ class Lift(InteractionSimilarityStrategy):
         出現の仕方が互いに一切関係なく、独立な場合にはリフト値は1となる。
         正の相関だと1より大きくなり負の相関だと1より小さくなる。
         """
-        (
-            interaction_intersect,
-            rbp_interaction,
-            rbp_columns,
-            nunique_gene,
-        ) = self._load_count_data()
+        rbp_count = self.rbp_interaction_count.to_numpy()
 
         value = (
-            interaction_intersect
-            / (rbp_interaction * rbp_interaction.reshape((-1, 1)))
-            * nunique_gene
+            self.interaction_intersection.to_numpy()
+            / (rbp_count * rbp_count.reshape((-1, 1)))
+            * self.nunique_gene
         )
 
-        return pd.DataFrame(value, index=rbp_columns, columns=rbp_columns, dtype=float)
+        return pd.DataFrame(
+            value,
+            index=self.interaction_intersection.index,
+            columns=self.interaction_intersection.columns,
+            dtype=float,
+        )
 
 
-class Dice(SimilarityStrategy):
+class Dice(InteractionSimilarityStrategy):
     def execute(self) -> pd.DataFrame:
-        return super().execute()
+        rbp_count = self.rbp_interaction_count.to_numpy()
+
+        value = (
+            self.interaction_intersection.to_numpy()
+            * 2
+            / (rbp_count + rbp_count.reshape((-1, 1)))
+        )
+
+        return pd.DataFrame(
+            value,
+            index=self.interaction_intersection.index,
+            columns=self.interaction_intersection.columns,
+            dtype=float,
+        )
 
 
-class Jaccard(SimilarityStrategy):
+class Jaccard(InteractionSimilarityStrategy):
     def execute(self) -> pd.DataFrame:
-        return super().execute()
+
+        value = (
+            self.interaction_intersection.to_numpy() / self.interaction_union.to_numpy()
+        )
+
+        return pd.DataFrame(
+            value,
+            index=self.interaction_intersection.index,
+            columns=self.interaction_intersection.columns,
+            dtype=float,
+        )
 
 
-class Simpson(SimilarityStrategy):
+class Simpson(InteractionSimilarityStrategy):
     def execute(self) -> pd.DataFrame:
-        return super().execute()
+        rbp_count = self.rbp_interaction_count.to_numpy()
+        lower = np.minimum(rbp_count, rbp_count.reshape((-1, 1)))
+        assert self.interaction_intersection.shape == lower.shape
+
+        value = self.interaction_intersection.to_numpy() / lower
+
+        return pd.DataFrame(
+            value,
+            index=self.interaction_intersection.index,
+            columns=self.interaction_intersection.columns,
+            dtype=float,
+        )
 
 
-class Cosine(SimilarityStrategy):
+class Cosine(InteractionSimilarityStrategy):
     def execute(self) -> pd.DataFrame:
-        return super().execute()
+        rbp_count = self.rbp_interaction_count.to_numpy()
+
+        value = self.interaction_intersection.to_numpy() / np.sqrt(
+            rbp_count * rbp_count.reshape((-1, 1))
+        )
+
+        return pd.DataFrame(
+            value,
+            index=self.interaction_intersection.index,
+            columns=self.interaction_intersection.columns,
+            dtype=float,
+        )
