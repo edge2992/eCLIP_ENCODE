@@ -1,6 +1,6 @@
 import os
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -65,6 +65,52 @@ class SequenceSimilarityStrategy(SimilarityStrategy):
         return df[["From", "label"]].set_index("label").to_dict()["From"]  # type: ignore
 
 
+class InteractionSimilarityStrategy(SimilarityStrategy):
+    def __init__(
+        self,
+        report: Union[None, pd.DataFrame] = None,
+        loadfile: Union[None, str] = None,
+    ):
+        super().__init__(report)
+        self.loadfile = loadfile
+
+    def _load_count_data(self):
+        # 相互作用数と遺伝子数をそれぞれ読み込む
+        # TODO: hash化してキャッシュしたい
+        # DataFrameがhash化出来ない
+        # そこまで重い処理でもないので、一旦保留
+        # @lru_cache(maxsize=5)
+        def cached_load(
+            report: pd.DataFrame,
+        ) -> Tuple[np.ndarray, np.ndarray, List[str], int]:
+            from src.plot.util.process_intersect_gene import count_interection
+            from src.plot.util.process_report import (
+                count_gene,
+                gene_ids_eCLIP,
+                label_protein_biosample,
+            )
+
+            label_method = label_protein_biosample
+
+            # todo typo
+            interaction_intersect: pd.DataFrame = count_interection(
+                report, label_method
+            )
+            rbp_columns: List[str] = list(interaction_intersect.columns)
+            rbp_interaction: pd.Series = count_gene(report, label_method)[rbp_columns]
+            nunique_gene = len(gene_ids_eCLIP(report))
+            assert len(rbp_interaction) == len(rbp_columns)
+            assert (rbp_interaction.index == rbp_columns).all()
+            return (
+                interaction_intersect.to_numpy(),
+                rbp_interaction.to_numpy(),
+                rbp_columns,
+                nunique_gene,
+            )
+
+        return cached_load(self.report)
+
+
 class MSA(SequenceSimilarityStrategy):
     def _protein_similarity(self) -> pd.DataFrame:
         similarities, labels = self._load()
@@ -127,7 +173,7 @@ class Default(SimilarityStrategy):
         return super().execute()
 
 
-class Lift(SimilarityStrategy):
+class Lift(InteractionSimilarityStrategy):
     def execute(self) -> pd.DataFrame:
         """タンパク質のリフト値を計算する。
         リフト値はマーケット分析で使われる指標
@@ -137,27 +183,20 @@ class Lift(SimilarityStrategy):
         出現の仕方が互いに一切関係なく、独立な場合にはリフト値は1となる。
         正の相関だと1より大きくなり負の相関だと1より小さくなる。
         """
-        from src.plot.util.process_intersect_gene import count_interection
-        from src.plot.util.process_report import (
-            count_gene,
-            gene_ids_eCLIP,
-            label_protein_biosample,
-        )
+        (
+            interaction_intersect,
+            rbp_interaction,
+            rbp_columns,
+            nunique_gene,
+        ) = self._load_count_data()
 
-        label_method: Callable[[pd.DataFrame], pd.Series] = label_protein_biosample
-
-        intersect = count_interection(self.report, label_method)
-        gene = count_gene(self.report, label_method)
-        all_gene_count = len(gene_ids_eCLIP(self.report))
-        columns = intersect.columns
-
-        gene_value = gene[columns].to_numpy()
         value = (
-            intersect.to_numpy()
-            / (gene_value * gene_value.reshape((-1, 1)))
-            * all_gene_count
+            interaction_intersect
+            / (rbp_interaction * rbp_interaction.reshape((-1, 1)))
+            * nunique_gene
         )
-        return pd.DataFrame(value, index=columns, columns=columns)
+
+        return pd.DataFrame(value, index=rbp_columns, columns=rbp_columns, dtype=float)
 
 
 class Dice(SimilarityStrategy):
