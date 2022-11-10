@@ -8,8 +8,8 @@ from src.plot.util.process_by_accession import (
     count_gene_by_geneType,
     get_geneid_from_assay,
 )
-from src.util.bedfile import read_annotated_bed
-from src.util.get_bed_path import get_formatted_file_path
+from src.util.bedfile import count_file_length, read_annotated_bed
+from src.util.get_bed_path import get_file_path, get_formatted_file_path
 
 
 def label_full(report: pd.DataFrame):
@@ -58,6 +58,17 @@ def count_gene(
         report,
         lambda row: _count_gene(row, FormatStrategy.MAX),
         label_method,
+    )
+    return pd.Series(result)
+
+
+def count_binding(
+    report: pd.DataFrame,
+    label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Accession"],
+) -> pd.Series:
+    """ファイルの行数を数える"""
+    result = _create_accession_value(
+        report, lambda row: count_file_length(get_file_path(row)), label_method
     )
     return pd.Series(result)
 
