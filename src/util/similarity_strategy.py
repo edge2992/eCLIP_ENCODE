@@ -29,7 +29,7 @@ class SimilarityStrategy(ABC):
         raise NotImplementedError()
 
 
-class SequenceSimilarityStrategy(SimilarityStrategy):
+class ProteinSimilarityStrategy(SimilarityStrategy):
 
     UNIPROT_TABLE = os.path.join(PROJECT_PATH, "data/uniprot", "reviewed.tsv")
 
@@ -142,7 +142,7 @@ class InteractionSimilarityStrategy(SimilarityStrategy):
         return self._nunique_gene
 
 
-class MSA(SequenceSimilarityStrategy):
+class MSA(ProteinSimilarityStrategy):
     def _protein_similarity(self) -> pd.DataFrame:
         similarities, labels = self._load()
         return pd.DataFrame(similarities, index=labels, columns=labels, dtype=float)
@@ -174,7 +174,7 @@ class MSA(SequenceSimilarityStrategy):
         raise NotImplementedError()
 
 
-class TAPE(SequenceSimilarityStrategy):
+class TAPE(ProteinSimilarityStrategy):
     def _protein_similarity(self) -> pd.DataFrame:
         from scipy.spatial.distance import cosine, pdist, squareform
 
@@ -197,6 +197,31 @@ class TAPE(SequenceSimilarityStrategy):
     def _execute_tape(self, path: str):
         """TAPEを実行してファイルをpathに保存する"""
         raise NotImplementedError()
+
+
+class KeywordCosine(ProteinSimilarityStrategy):
+    def _protein_similarity(self) -> pd.DataFrame:
+        from src.util.uniprot import load_keyword_report
+        from scipy.spatial.distance import cosine, pdist, squareform
+        from sklearn.feature_extraction.text import TfidfVectorizer
+
+        keywords = load_keyword_report(False)
+
+        keywords["Keyword ID"] = keywords["Keyword ID"].map(
+            lambda x: [key.strip() for key in x.split(";")]
+        )
+        keywords["label"] = "sp|" + keywords["Entry"] + "|" + keywords["Entry Name"]
+        vectorizer = TfidfVectorizer()
+        print(keywords["Keyword ID"].head())
+        X = vectorizer.fit_transform(
+            keywords["Keyword ID"].map(lambda x: " ".join([y[2:] for y in x]))
+        )
+        print(vectorizer.get_feature_names_out())
+        return pd.DataFrame(
+            squareform(pdist(X.toarray(), cosine)),  # type: ignore
+            index=keywords["label"].tolist(),
+            columns=keywords["label"].tolist(),
+        )
 
 
 class Default(SimilarityStrategy):

@@ -225,3 +225,26 @@ def test_cosine_protein():
             gene2 = get_gene_list(report, str(col))
             expected = len(set(gene1) & set(gene2)) / np.sqrt(len(gene1) * len(gene2))
             assert np.isclose(value, expected, atol=1e-9), f"{index}, {col} invalid"
+
+
+def test_keywordcosine():
+    """report.txtとsimilarity_matrixのラベル (タンパク質) が一致する"""
+    """Multiple Sequence Analysis Distanceのテスト"""
+    from src.util.bedfile import load_replicateIDR_report
+    from src.util.similarity_protein import Similarity
+    from src.util.similarity_strategy import KeywordCosine
+
+    similarity = Similarity()
+    similarity.setStrategy(KeywordCosine())
+
+    df = similarity.executeStrategy()
+    print(df.head())
+
+    expected = load_replicateIDR_report()["Target label"].unique().tolist()
+    assert df.shape[0] == df.shape[1]
+    assert len(df.columns) == len(expected)
+    for protein in expected:
+        assert protein in df.columns
+        assert protein in df.index
+    data = df.to_numpy()
+    assert (data == data.T).reshape(-1).all(), "対称行列である"

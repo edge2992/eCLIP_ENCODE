@@ -37,10 +37,10 @@ def load_keyword_list():
     return pd.read_table(KEYWORD_FILE).drop("Gene Ontologies", axis=1)
 
 
-def load_splited_keyword_report():
+def load_splited_keyword_report(is_unique: bool = True) -> pd.DataFrame:
     """keywordを分割して読み込む"""
     tmp = (
-        load_keyword_report()
+        load_keyword_report(is_unique)
         .set_index("From")["Keyword ID"]
         .map(lambda x: [key.strip() for key in x.split(";")])
         .explode()
