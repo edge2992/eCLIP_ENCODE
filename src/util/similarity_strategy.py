@@ -8,21 +8,26 @@ import pandas as pd
 from dotenv import load_dotenv
 from tqdm import tqdm
 
-from src.plot.util.process_report import label_protein_biosample
-
 load_dotenv()
 
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 
 
 class SimilarityStrategy(ABC):
-    def __init__(self, report: Union[None, pd.DataFrame] = None):
+    def __init__(
+        self,
+        report: Union[None, pd.DataFrame] = None,
+        loadfile: Union[None, str] = None,
+        label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
+    ):
         if report is None:
             from src.util.bedfile import load_replicateIDR_report
 
             self.report = load_replicateIDR_report()
         else:
             self.report = report
+        self.loadfile = loadfile
+        self.label_method = label_method
 
     @abstractmethod
     def execute(self) -> pd.DataFrame:
@@ -37,9 +42,9 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
         self,
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
+        label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
     ):
-        super().__init__(report)
-        self.loadfile = loadfile
+        super().__init__(report, loadfile, label_method)
 
     def execute(self) -> pd.DataFrame:
         similarities = self._protein_similarity()
@@ -48,6 +53,42 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
         return similarities.loc[
             list(mapping_dict.keys()), list(mapping_dict.keys())
         ].rename(index=mapping_dict, columns=mapping_dict)
+
+    def transform(self, similarities: pd.DataFrame) -> pd.DataFrame:
+        """reportに沿って、タンパク質の類似度ベクトルを作成する"""
+        from scipy.spatial.distance import squareform
+
+        report_dataset_indexed = self.report.set_index("Dataset")
+
+        def get_protein_from_dataset(dataset: str) -> str:
+            """データセットからタンパク質名を取得する"""
+            seri = report_dataset_indexed.loc[dataset]
+            return str(seri["Target label"])
+
+        def get_similarity(dataset1: str, dataset2: str):
+            gene1 = get_protein_from_dataset(dataset1)
+            gene2 = get_protein_from_dataset(dataset2)
+            return similarities.loc[gene1, gene2]
+
+        def upper_triangle(label: List[str]):
+            # Accessionのラベルにしたがって、
+            # タンパク質の類似度行列を並び替える
+            # scipy _pdist_callable like function
+            # https://github.com/scipy/scipy/blob/v1.9.3/scipy/spatial/distance.py#L1943-L2246
+            n = len(label)
+            out_size = (n * (n - 1)) // 2
+            dm = np.empty(out_size, dtype=np.float32)
+            k = 0
+            for i in range(n - 1):
+                for j in range(i + 1, n):
+                    dm[k] = get_similarity(label[i], label[j])
+                    k += 1
+            return dm
+
+        labels: List[str] = self.report["Dataset"].to_list()
+        return pd.DataFrame(
+            squareform(upper_triangle(labels)), index=labels, columns=labels
+        )
 
     @abstractmethod
     def _protein_similarity(self) -> pd.DataFrame:
@@ -78,11 +119,9 @@ class InteractionSimilarityStrategy(SimilarityStrategy):
         self,
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
-        label_method: Callable[[pd.DataFrame], pd.Series] = label_protein_biosample,
+        label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
     ):
-        super().__init__(report)
-        self.loadfile = loadfile
-        self.label_method = label_method
+        super().__init__(report, loadfile, label_method)
 
     @property
     def accession_genes(self) -> Dict[str, List[str]]:
