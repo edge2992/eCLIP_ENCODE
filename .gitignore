@@ -1,3 +1,5 @@
 .env
 annotated_data
 *.pyc
+
+data/keyword_count.tsv

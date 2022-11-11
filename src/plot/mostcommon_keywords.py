@@ -12,6 +12,8 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from src.util.uniprot import keyword_count
+
 load_dotenv()
 
 PROJECT_PATH = os.environ["PROJECT_PATH"]
@@ -19,36 +21,10 @@ KEYWORD_FILE = "/mnt/H/MYWORK/eCLIP_ENCODE/data/uniprot/keyword_list.tsv"
 KEYWORD_PROTEIN = "/mnt/H/MYWORK/eCLIP_ENCODE/data/uniprot/reviewed_keyword.tsv"
 
 # %%
-# convert : pd.dataFrame -> Dict[str, List[Protein(str)]]
-df = pd.read_table(KEYWORD_PROTEIN)
-print(df.head())
-
-# %%
-# top 50のキーワードを見る
-
-
-def get_keyword_count() -> pd.DataFrame:
-    counted: pd.Series = (
-        pd.read_table(KEYWORD_PROTEIN)["Keyword ID"]
-        .map(lambda x: [key.strip() for key in x.split(";")])
-        .explode()
-        .value_counts()
-    ).rename("count")
-    result = pd.concat(
-        [counted, pd.read_table(KEYWORD_FILE).set_index("Keyword ID", drop=True)],
-        axis=1,
-        join="inner",
-    )
-    assert counted.shape[0] == result.shape[0]
-    return result
-
-
-df = get_keyword_count()
+df = keyword_count()
 print(df.shape)
 print(df.head())
-df.drop("Gene Ontologies", axis=1).to_csv(
-    os.path.join(PROJECT_PATH, "data", "keyword_count.tsv"), sep="\t"
-)
+df.to_csv(os.path.join(PROJECT_PATH, "data", "keyword_count.tsv"), sep="\t")
 # %%
 print("---", "Domain", "---")
 print(df[df["Category"] == "Domain"])
@@ -102,6 +78,7 @@ fig, ax = plt.subplots(figsize=(20, 20))
 sns.heatmap(
     count_matrix(10), ax=ax, cmap="Blues", annot=True, fmt="d", linewidth=0.5, vmax=50
 )
+fig.suptitle("Keyword count matrix", fontsize=20)
 fig.savefig(
     os.path.join(PROJECT_PATH, "src/plot/img", "mostcommon_keywords", "heatmap.png")
 )
