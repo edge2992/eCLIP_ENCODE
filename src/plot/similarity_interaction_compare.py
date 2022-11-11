@@ -2,19 +2,19 @@
 # 1.
 
 # %%
+import os
 import pandas as pd
 import seaborn as sns
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 
-from src.util.similarity_protein import Similarity
-from src.util.similarity_strategy import Lift, Dice, Jaccard, Simpson, Cosine
+from src.util.similarity_protein import InteractionSimilarity
+from src.util.similarity_strategy import Cosine, Dice, Jaccard, Lift, Simpson
 
 # %%
-similarity = Similarity()
+similarity = InteractionSimilarity()
 similarity.setStrategy(Lift())
 lift = similarity.executeStrategy()
 
@@ -34,11 +34,11 @@ cosine = similarity.executeStrategy()
 
 data = pd.DataFrame(
     {
-        "Lift": lift.to_numpy().reshape(-1),
-        "Dice": dice.to_numpy().reshape(-1),
-        "Jaccard": jaccard.to_numpy().reshape(-1),
-        "Simpson": simpson.to_numpy().reshape(-1),
-        "Cosine": cosine.to_numpy().reshape(-1),
+        "Lift": similarity.flatten_tri(lift),
+        "Dice": similarity.flatten_tri(dice),
+        "Jaccard": similarity.flatten_tri(jaccard),
+        "Simpson": similarity.flatten_tri(simpson),
+        "Cosine": similarity.flatten_tri(cosine),
     }
 )
 splot = sns.pairplot(data, plot_kws={"alpha": 0.1})
@@ -54,3 +54,6 @@ splot.fig.savefig(
 # 1. 連続値で色付け
 # 2. TAPEとKeywordのsimilarityの上位10%を色付け
 # 2.1 上位10%がなにかを出力で示す
+cosine.head()
+
+# %%

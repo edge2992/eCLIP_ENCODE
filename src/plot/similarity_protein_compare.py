@@ -35,9 +35,9 @@ assert (keyword.columns == tape.columns).all()
 
 data = pd.DataFrame(
     {
-        "MSA": msa.to_numpy().reshape(-1),
-        "TAPE": tape.to_numpy().reshape(-1),
-        "Keyword": keyword.to_numpy().reshape(-1),
+        "MSA": similarity.flatten_tri(msa),
+        "TAPE": similarity.flatten_tri(tape),
+        "Keyword": similarity.flatten_tri(keyword),
     }
 )
 

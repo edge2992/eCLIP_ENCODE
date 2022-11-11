@@ -268,3 +268,21 @@ def test_protein_transform():
     assert len(df.columns) == len(report)
     data = df.to_numpy()
     assert (data == data.T).reshape(-1).all(), "対称行列である"
+
+
+def test_flatten_tri():
+    from src.util.bedfile import load_replicateIDR_report
+    from src.util.similarity_protein import ProteinSimilarity
+    from src.util.similarity_strategy import MSA
+
+    N_TEST = 60
+    report = load_replicateIDR_report().head(N_TEST)
+
+    similarity = ProteinSimilarity()
+    similarity.setStrategy(MSA(report=report))
+
+    df = similarity.executeStrategy(transform=True)
+    flat = similarity.flatten_tri(df)
+    assert flat.shape[0] == df.shape[0] * (df.shape[0] - 1) / 2 + df.shape[0]
+    flat = similarity.flatten_tri(df, include_diagonal=False)
+    assert flat.shape[0] == df.shape[0] * (df.shape[0] - 1) / 2
