@@ -13,12 +13,12 @@ load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 
 from src.util.similarity_protein import Similarity
-from src.util.similarity_strategy import MSA, TAPE, KeywordCosine
+from src.util.similarity_strategy import BlastP, TAPE, KeywordCosine
 
 # %%
 similarity = Similarity()
 
-similarity.setStrategy(MSA())
+similarity.setStrategy(BlastP())
 msa = similarity.executeStrategy()
 
 similarity.setStrategy(TAPE())
@@ -35,14 +35,19 @@ assert (keyword.columns == tape.columns).all()
 
 data = pd.DataFrame(
     {
-        "MSA": similarity.flatten_tri(msa),
-        "TAPE": similarity.flatten_tri(tape),
-        "Keyword": similarity.flatten_tri(keyword),
+        "blastp (bitscore)": similarity.flatten_tri(msa),
+        "TAPE (cosine)": similarity.flatten_tri(tape),
+        "Keyword (cosine)": similarity.flatten_tri(keyword),
     }
 )
 
 splot = sns.pairplot(data, plot_kws={"alpha": 0.1})
 splot.fig.suptitle("Similarity of proteins")
+for ax in splot.axes.flatten():
+    if ax.get_xlabel() == "blastp (bitscore)":
+        ax.set(xscale="log")
+    if ax.get_ylabel() == "blastp (bitscore)":
+        ax.set(yscale="log")
 splot.fig.subplots_adjust(top=0.9)
 splot.fig.savefig(
     os.path.join(PROJECT_PATH, "src/plot/img", "similarity_protein_compare.png")
