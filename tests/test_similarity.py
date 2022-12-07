@@ -250,6 +250,27 @@ def test_keywordcosine():
     assert (data == data.T).reshape(-1).all(), "対称行列である"
 
 
+def test_blstp():
+    # from src.util.bedfile import load_replicateIDR_report
+    from src.util.similarity_protein import InteractionSimilarity
+    from src.util.similarity_strategy import BlastP
+
+    similarity = InteractionSimilarity()
+    similarity.setStrategy(BlastP())
+
+    df = similarity.executeStrategy()
+    print(df.head())
+
+    # expected = load_replicateIDR_report()["Target label"].unique().tolist()
+    # assert df.shape[0] == df.shape[1]
+    # assert len(df.columns) == len(expected)
+    # for protein in expected:
+    #     assert protein in df.columns
+    #     assert protein in df.index
+    # data = df.to_numpy()
+    # assert (data == data.T).reshape(-1).all(), "対称行列である"
+
+
 def test_protein_transform():
     """Datasetへの変換ができる"""
     from src.util.bedfile import load_replicateIDR_report
