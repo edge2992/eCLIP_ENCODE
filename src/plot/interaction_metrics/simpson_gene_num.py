@@ -11,6 +11,7 @@ from src.util.similarity_protein import InteractionSimilarity
 from src.util.similarity_strategy import Simpson
 
 from src.plot.interaction_metrics.representative import (
+    convert_to_dict_exp_pair_by_keyword,
     get_keyword,
     target_report,
     metrics,
@@ -116,5 +117,21 @@ sns.countplot(sample_ex, y="keyword", hue="metric", ax=ax)
 fig.savefig(
     os.path.join(SAVEDIR, f"{BIOSAMPLE}_keyword_common.png"), bbox_inches="tight"
 )
+
+# %%
+keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
+
+# %%
+splice_data = data.iloc[keyword_experiment_pair["Spliceosome"]]
+splice_data[splice_data["simpson"] >= 0.75].sort_values(
+    "simpson", ascending=False
+).to_csv(os.path.join(SAVEDIR, f"{BIOSAMPLE}_Spliceosome_high_simpson.csv"))
+
+
+# %%
+data[
+    (data["TAPE"].rank() > (len(data) / 2))
+    & (data["simpson"].rank(ascending=False) < 300)
+].to_csv(os.path.join(SAVEDIR, f"{BIOSAMPLE}_low_TAPE_high_simpson.csv"))
 
 # %%
