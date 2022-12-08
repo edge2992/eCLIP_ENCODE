@@ -72,25 +72,26 @@ def plot_pairplot_by_keyword(
     return splot
 
 
+def convert_to_dict_exp_pair_by_keyword(data: pd.DataFrame):
+    keyword_experiment_pair: Dict[str, List] = {}
+
+    for index, row in tqdm(data.iterrows()):
+        keyword1 = get_keyword(row["Dataset_1"])
+        keyword2 = get_keyword(row["Dataset_2"])
+        intersection_keyword = list(set(keyword1) & set(keyword2))
+        for k in intersection_keyword:
+            if k not in keyword_experiment_pair:
+                keyword_experiment_pair[k] = []
+            keyword_experiment_pair[k].append(index)
+    return keyword_experiment_pair
+
+
 # %%
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
 data = metrics(report)
-data.shape
 
-# %%
-keyword_experiment_pair: Dict[str, List] = {}
-
-for index, row in tqdm(data.iterrows()):
-    keyword1 = get_keyword(row["Dataset_1"])
-    keyword2 = get_keyword(row["Dataset_2"])
-    intersection_keyword = list(set(keyword1) & set(keyword2))
-    for k in intersection_keyword:
-        if k not in keyword_experiment_pair:
-            keyword_experiment_pair[k] = []
-        keyword_experiment_pair[k].append(index)
-
-# %%
+keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
 keyword_num_series = pd.Series(
     {key: len(values) for key, values in keyword_experiment_pair.items()}
 ).sort_values(ascending=False)
@@ -116,4 +117,73 @@ for index, (keyword, num) in enumerate(keyword_num_series.items()):
     plt.clf()
     plt.close()
 
+# %%
+
+
+def calc_precision_at_k(
+    data: pd.DataFrame, keyword_exp_pair: Dict[str, List[int]], keyword: str, k: int
+):
+    """simpsonスコアの上位K個を正解とする場合
+    keywordを持つものは上位K個のうち何割入っているか"""
+    if k == 0 or keyword not in keyword_exp_pair:
+        return 0.0
+    true_k = data.sort_values("simpson", ascending=False).iloc[:k].index.to_list()
+    precision_at_k = len(set(keyword_exp_pair[keyword]) & set(true_k)) / k
+    return precision_at_k
+
+
+def recall_at_k(
+    data: pd.DataFrame, keyword_exp_pair: Dict[str, List[int]], keyword: str, k: int
+):
+    """simpsonスコアの上位K個を正解とする場合
+    keywordを持つものはkeywordをもつもの全体のうち何割入っているか"""
+    if k == 0 or keyword not in keyword_exp_pair:
+        return 0.0
+    true_k = data.sort_values("simpson", ascending=False).iloc[:k].index.to_list()
+    recall_at_k = len(set(keyword_exp_pair[keyword]) & set(true_k)) / len(
+        keyword_exp_pair[keyword]
+    )
+    return recall_at_k
+
+
+# %%
+result_metrics_list = []
+for keyword, num in tqdm(keyword_num_series.items()):
+    if num < 10:
+        continue
+    for k in range(0, 300, 5):
+        keyword = str(keyword)
+        result_metrics_list.append(
+            {
+                "keyword": keyword,
+                "precision@K": calc_precision_at_k(
+                    data, keyword_experiment_pair, keyword, k
+                ),
+                "recall@K": recall_at_k(data, keyword_experiment_pair, keyword, k),
+                "K": k,
+            }
+        )
+result_metrics = pd.DataFrame(result_metrics_list)
+result_metrics.head()
+
+# %%
+FIG_N = 3
+fig, axes = plt.subplots(FIG_N, 1, figsize=(10, FIG_N * 5))
+print(axes)
+
+for ax, keys in zip(axes, np.array_split(result_metrics["keyword"].unique(), FIG_N)):
+    for keyword in keys:
+        sample = result_metrics[result_metrics["keyword"] == keyword]
+        ax.plot(sample["recall@K"], sample["precision@K"], label=keyword)
+    ax.set_ylabel("Precision@K")
+    ax.set_xlabel("Recall@K")
+    ax.set_xlim(0, 0.6)
+    ax.set_ylim(0, 1.05)
+    ax.legend(loc="center right", bbox_to_anchor=(1.0, 0.5), ncol=1)
+
+fig.savefig(
+    os.path.join(SAVEDIR, "precision_recall_curve.png"),
+    dpi=300,
+    bbox_inches="tight",
+)
 # %%
