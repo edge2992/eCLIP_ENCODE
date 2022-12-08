@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.plot.interaction_metrics.representative import (
-    get_keyword,
+    convert_to_dict_exp_pair_by_keyword,
     target_report,
     metrics,
 )
@@ -70,20 +70,6 @@ def plot_pairplot_by_keyword(
     splot.fig.subplots_adjust(top=0.95)
 
     return splot
-
-
-def convert_to_dict_exp_pair_by_keyword(data: pd.DataFrame):
-    keyword_experiment_pair: Dict[str, List] = {}
-
-    for index, row in tqdm(data.iterrows()):
-        keyword1 = get_keyword(row["Dataset_1"])
-        keyword2 = get_keyword(row["Dataset_2"])
-        intersection_keyword = list(set(keyword1) & set(keyword2))
-        for k in intersection_keyword:
-            if k not in keyword_experiment_pair:
-                keyword_experiment_pair[k] = []
-            keyword_experiment_pair[k].append(index)
-    return keyword_experiment_pair
 
 
 # %%

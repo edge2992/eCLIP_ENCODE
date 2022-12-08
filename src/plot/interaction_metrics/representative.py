@@ -1,12 +1,21 @@
 # このフォルダで使用する便利関数
+from typing import Dict, List
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import squareform
+from tqdm import tqdm
 
 from src.plot.util.process_report import count_gene
 from src.util.bedfile import load_replicateIDR_report, read_annotated_bed
 from src.util.similarity_protein import InteractionSimilarity, ProteinSimilarity
-from src.util.similarity_strategy import TAPE, BlastP, KeywordCosine, Simpson
+from src.util.similarity_strategy import (
+    TAPE,
+    BlastP,
+    Cosine,
+    KeywordCosine,
+    Lift,
+    Simpson,
+)
 from src.util.get_bed_path import get_formatted_file_path
 from src.util.bed_format_strategy import FormatStrategy
 from src.util.uniprot import load_keyword_report
@@ -51,6 +60,8 @@ def metrics(report: pd.DataFrame):
             "keyword": protein_similarity(KeywordCosine(report=report)),
             "blastp": protein_similarity(BlastP(report=report)),
             "simpson": interaction_similarity(Simpson(report=report)),
+            "lift": interaction_similarity(Lift(report=report)),
+            "cosine": interaction_similarity(Cosine(report=report)),
         }
     )
     index_n = np.where(np.triu(squareform(np.ones(data.shape[0]))))
@@ -84,6 +95,21 @@ def get_keyword(dataset: str):
     target: str = report.loc[dataset]["Target label"]
     data_str: str = keywords.loc[target, "Keywords"]  # type: ignore
     return [key.strip() for key in data_str.split(";")]
+
+
+def convert_to_dict_exp_pair_by_keyword(data: pd.DataFrame):
+    """keyword -> dataのindexの辞書を作成する"""
+    keyword_experiment_pair: Dict[str, List] = {}
+
+    for index, row in tqdm(data.iterrows()):
+        keyword1 = get_keyword(row["Dataset_1"])
+        keyword2 = get_keyword(row["Dataset_2"])
+        intersection_keyword = list(set(keyword1) & set(keyword2))
+        for k in intersection_keyword:
+            if k not in keyword_experiment_pair:
+                keyword_experiment_pair[k] = []
+            keyword_experiment_pair[k].append(index)
+    return keyword_experiment_pair
 
 
 def describe_dataset_pair(row: pd.Series):
