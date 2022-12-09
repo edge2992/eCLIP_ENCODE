@@ -5,7 +5,7 @@ import io
 import pandas as pd
 
 # STRING_API_BASE = "https://string-db.org/api"
-STRING_API_BASE = "https://version-11-5.string-db.org"
+STRING_API_BASE = "https://version-11-5.string-db.org/api"
 CALLER_IDENTITY = "https://github.com/edge2992"
 
 
