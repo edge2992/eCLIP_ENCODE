@@ -50,9 +50,12 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
         similarities = self._protein_similarity()
         mapping_dict = self._idmapping()
 
-        return similarities.loc[
-            list(mapping_dict.keys()), list(mapping_dict.keys())
-        ].rename(index=mapping_dict, columns=mapping_dict)
+        return (
+            similarities.loc[list(mapping_dict.keys()), list(mapping_dict.keys())]
+            .rename(index=mapping_dict, columns=mapping_dict)
+            .sort_index(axis=0)
+            .sort_index(axis=1)
+        )
 
     def transform(self, similarities: pd.DataFrame) -> pd.DataFrame:
         """reportに沿って、タンパク質の類似度ベクトルを作成する"""
@@ -92,6 +95,7 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
 
     @abstractmethod
     def _protein_similarity(self) -> pd.DataFrame:
+        # DataFrameとColumnとIndexの順番は自由
         raise NotImplementedError()
 
     def _idmapping(self) -> Dict[str, str]:
