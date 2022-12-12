@@ -16,7 +16,7 @@ class Similarity(ABC):
         if strategy is not None:
             self.strategy = strategy
         else:
-            self.stragety = Default()
+            self.strategy = Default()
 
     def executeStrategy(self):
         return self.strategy.execute()
