@@ -1,22 +1,14 @@
 # %%
 
-from src.util.uniprot import idmapping
 import os
 import shutil
 import pandas as pd
+from src.util.similarity_strategy.foldseek import idmapping_mmcif
 
 # %%
 
 ALDB_DIR = "/home/edge2992/H/MYWORK/alphafolddb"
 RDB_STRUCT_DIR = "/home/edge2992/H/MYWORK/eCLIP_ENCODE/data/afdb/rbp"
-
-
-def idmapping_mmcif():
-    uniprot_dict = idmapping()
-    result = {}
-    for key, value in uniprot_dict.items():
-        result[key] = "AF-{}-F1-model_v3.cif.gz".format(value.split("|")[1])
-    return result
 
 
 # %%
