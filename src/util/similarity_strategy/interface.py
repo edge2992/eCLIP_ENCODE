@@ -42,19 +42,47 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
         self,
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
+        symmetric: bool = False,
+        symmetric_method: str = "average",
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
     ):
         super().__init__(report, loadfile, label_method)
+
+        if symmetric_method not in ["average", "max", "min"]:
+            raise ValueError("symmetric_method must be average, max or min")
+        self.symmetric = symmetric
+        self.symmetric_method = symmetric_method
 
     def execute(self) -> pd.DataFrame:
         similarities = self._protein_similarity()
         mapping_dict = self._idmapping()
 
-        return (
+        return self.make_symmetric(
             similarities.loc[list(mapping_dict.keys()), list(mapping_dict.keys())]
             .rename(index=mapping_dict, columns=mapping_dict)
             .sort_index(axis=0)
             .sort_index(axis=1)
+        )
+
+    def make_symmetric(self, similarities: pd.DataFrame) -> pd.DataFrame:
+        values = similarities.values
+        if self.symmetric:
+            values = np.stack([values, values.T])
+            if self.symmetric_method == "average":
+                values = values.sum(axis=0) / 2
+            elif self.symmetric_method == "max":
+                values = values.max(axis=0)
+            elif self.symmetric_method == "min":
+                values = values.min(axis=1)
+            else:
+                raise ValueError(
+                    "symmetric_method must be average, max or min",
+                    self.symmetric_method,
+                )
+        assert values.shape[0] == values.shape[1]
+        assert values.shape[0] == similarities.shape[0]
+        return pd.DataFrame(
+            values, index=similarities.index, columns=similarities.columns
         )
 
     def transform(self, similarities: pd.DataFrame) -> pd.DataFrame:

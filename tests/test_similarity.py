@@ -261,14 +261,28 @@ def test_blstp():
     df = similarity.executeStrategy()
     print(df.head())
 
-    # expected = load_replicateIDR_report()["Target label"].unique().tolist()
-    # assert df.shape[0] == df.shape[1]
-    # assert len(df.columns) == len(expected)
-    # for protein in expected:
-    #     assert protein in df.columns
-    #     assert protein in df.index
-    # data = df.to_numpy()
-    # assert (data == data.T).reshape(-1).all(), "対称行列である"
+
+def test_protein_make_symmetric():
+    """対称行列に変換できる"""
+    from src.util.similarity_protein import InteractionSimilarity
+    from src.util.similarity_strategy import BlastP
+
+    similarity = InteractionSimilarity()
+    similarity.setStrategy(BlastP())
+    non_symmetric_data = similarity.executeStrategy()
+
+    similarity.setStrategy(BlastP(symmetric=True, symmetric_method="max"))
+    symmetric_data = similarity.executeStrategy()
+    simmetric_array = symmetric_data.to_numpy()
+
+    assert (simmetric_array == simmetric_array.T).reshape(-1).all(), "対称行列である"
+
+    columns = symmetric_data.columns.to_list()
+    for i in range(len(columns)):
+        for j in range(len(columns)):
+            expected = max(non_symmetric_data.iloc[i, j], non_symmetric_data.iloc[j, i])  # type: ignore
+            values = symmetric_data.iloc[i, j]
+            assert np.isclose(values, expected)  # type: ignore
 
 
 def test_protein_transform():
