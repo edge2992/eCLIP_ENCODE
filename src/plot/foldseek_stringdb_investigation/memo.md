@@ -3,11 +3,11 @@
 ## 検証
 
 - [x] foldseekのTMscoreの行列は対象行列ではないらしいので、どうなっているかを確認して、必要であれば対象行列にすることを考える。 -> metrics_foldseek.py
-- タンパク質ごとにスコアの分布を見る
-- nullが入っていた場所がどこかを確認する
+- [x] タンパク質ごとにスコアの分布を見る
+- [x] nullが入っていた場所がどこかを確認する
 - score同士の分布を可視化して特徴を掴む
     - [x] アライメントスコアとfoldseekのTMscoreを比較する -> metrics_foldseek.py
-    - stringdbの複数のスコアを比較する
+    - [x] stringdbの複数のスコアを比較する -> metrics_stringdb.py
     - stringdbのスコアとkeywordのスコアを比較する (同じkeywordで複合体を形成しているタンパク質ペアがあった時にscoreが高くあってほしい)
     - foldseekのTMscoreとkeywordのスコアを比較する (ドメインが同じであればTMscoreが高くあってほしい)
 
