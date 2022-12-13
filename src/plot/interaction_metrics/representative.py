@@ -1,9 +1,8 @@
 # このフォルダで使用する便利関数
-from typing import Callable, Dict, List
+from typing import Callable, Dict
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import squareform
-from tqdm import tqdm
 
 from src.plot.util.process_report import count_gene
 from src.util.bedfile import load_replicateIDR_report, read_annotated_bed
@@ -61,6 +60,7 @@ def metrics(
         str,
         Callable[[pd.DataFrame], SimilarityStrategy],
     ],
+    sort_by: str = "TAPE",
 ):
     """統計値を整形する
     タンパク質の類似度: TAPE(cosine distance), blastp(bit score), keyword(cosine distance)
@@ -104,7 +104,7 @@ def metrics(
         ],
         axis=1,
     )
-    return pd.concat([desc, data], axis=1).sort_values("TAPE").reset_index(drop=True)
+    return pd.concat([desc, data], axis=1).sort_values(sort_by).reset_index(drop=True)
 
 
 def get_geneset(dataset: str, how=FormatStrategy.MAX):
@@ -125,17 +125,17 @@ def get_keyword(dataset: str):
 
 def convert_to_dict_exp_pair_by_keyword(data: pd.DataFrame):
     """keyword -> dataのindexの辞書を作成する"""
-    keyword_experiment_pair: Dict[str, List] = {}
 
-    for index, row in tqdm(data.iterrows()):
+    def intersection_keyword(row: pd.Series):
         keyword1 = get_keyword(row["Dataset_1"])
         keyword2 = get_keyword(row["Dataset_2"])
-        intersection_keyword = list(set(keyword1) & set(keyword2))
-        for k in intersection_keyword:
-            if k not in keyword_experiment_pair:
-                keyword_experiment_pair[k] = []
-            keyword_experiment_pair[k].append(index)
-    return keyword_experiment_pair
+        return list(set(keyword1) & set(keyword2))
+
+    keywords = data.apply(intersection_keyword, axis=1)  # type: ignore
+    keywords.name = "keyword"
+    return dict(
+        keywords.explode().reset_index().groupby("keyword")["index"].apply(list)
+    )
 
 
 def describe_dataset_pair(row: pd.Series):
