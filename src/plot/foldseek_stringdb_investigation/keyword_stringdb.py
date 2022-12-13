@@ -10,10 +10,10 @@ from dotenv import load_dotenv
 
 from src.plot.interaction_metrics.representative import (
     convert_to_dict_exp_pair_by_keyword,
-    target_report,
     metrics,
+    target_report,
 )
-from src.util.similarity_strategy import Jaccard, Simpson, TAPE, DirectStringScore
+from src.util.similarity_strategy import TAPE, DirectStringScore, Jaccard, Simpson
 
 sns.set(font_scale=1.4)
 
@@ -52,34 +52,56 @@ data = metrics(report, protein_strategies, interaction_strategies)
 keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
 
 # %%
-data.head()
-plot_data = pd.DataFrame()
-for keyword, value in keyword_experiment_pair.items():
-    print(keyword, len(value))
-    print(data.iloc[value, :].head())
-    sample = (
-        data.iloc[value, :][
-            ["stringdb_score", "stringdb_ascore", "stringdb_escore", "stringdb_tscore"]
-        ]
-        .copy()
-        .reset_index()
+
+
+def construct_plotting_data(data: pd.DataFrame, keyword_experiment_pair):
+    plot_data = pd.DataFrame()
+    for keyword, value in keyword_experiment_pair.items():
+        print(keyword, len(value))
+        print(data.iloc[value, :].head())
+        sample = (
+            data.iloc[value, :][
+                [
+                    "stringdb_score",
+                    "stringdb_ascore",
+                    "stringdb_escore",
+                    "stringdb_tscore",
+                ]
+            ]
+            .copy()
+            .reset_index()
+        )
+        sample["label"] = f"{keyword} (#{len(value)})"
+        plot_data = pd.concat([plot_data, sample], axis=0)
+    return plot_data
+
+
+def plot_boxplot_by_keyword(data: pd.DataFrame, metrics: str):
+    order_xlabels = (
+        data.groupby("label")
+        .mean()
+        .sort_values(metrics, ascending=False)
+        .index.to_list()
     )
-    sample["label"] = keyword
-    plot_data = pd.concat([plot_data, sample], axis=0)
+
+    fig, ax = plt.subplots(figsize=(50, 10))
+    sns.boxplot(data, x="label", y=metrics, order=order_xlabels, ax=ax)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+    fig.tight_layout()
+    return fig
+
 
 # %%
-print(plot_data.shape)
-print(plot_data.head())
-fig, ax = plt.subplots(figsize=(100, 10))
-sns.boxplot(plot_data, x="label", y="stringdb_score", ax=ax)
-ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
-fig.tight_layout()
-fig.savefig(os.path.join(SAVEDIR, "boxplot_stringdb_score.png"))
 
-# TODO: 全てと比較する
-# labelの文字を大きくする 並び替えをする
-# 色を付けない
-# ラベルにデータ数を含める
+plot_data = construct_plotting_data(data, keyword_experiment_pair)
 
+for met in [
+    "stringdb_score",
+    "stringdb_ascore",
+    "stringdb_escore",
+    "stringdb_tscore",
+]:
+    fig = plot_boxplot_by_keyword(plot_data, met)
+    fig.savefig(os.path.join(SAVEDIR, f"boxplot_{met}.png"), bbox_inches="tight")
 
 # %%
