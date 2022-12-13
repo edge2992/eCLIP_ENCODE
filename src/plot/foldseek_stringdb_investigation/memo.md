@@ -1,4 +1,4 @@
-## やりたいこと
+# やりたいこと
 
 ## 検証
 
@@ -8,8 +8,8 @@
 - score同士の分布を可視化して特徴を掴む
     - [x] アライメントスコアとfoldseekのTMscoreを比較する -> metrics_foldseek.py
     - [x] stringdbの複数のスコアを比較する -> metrics_stringdb.py
-    - stringdbのスコアとkeywordのスコアを比較する (同じkeywordで複合体を形成しているタンパク質ペアがあった時にscoreが高くあってほしい)
-    - foldseekのTMscoreとkeywordのスコアを比較する (ドメインが同じであればTMscoreが高くあってほしい)
+    - [x] stringdbのスコアとkeywordのスコアを比較する (同じkeywordで複合体を形成しているタンパク質ペアがあった時にscoreが高くあってほしい) -> keyword_stringdb.py
+    - [x] foldseekのTMscoreとkeywordのスコアを比較する (ドメインが同じであればTMscoreが高くあってほしい) -> keyword_foldseek.py
 
 
 ## 考察
