@@ -20,6 +20,8 @@
 >経験即では50以上のbitスコアが良いらしい
 https://ravilabio.info/notes/bioinformatics/e-value-bitscore.html
 
+# TMScoreはクエリのタンパク質の長さが短ければ、高く出る傾向がある。統計に影響するのでmax, min, avgの処理を追加する
+
 ### TODO: 
-- 閾値を50あたりにして分布を比較してみる
+- [x] 閾値を50あたりにして分布を比較してみる
 - homologyスコアをstringdbから取得して, blastpの結果と比較する
