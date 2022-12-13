@@ -1,5 +1,5 @@
 # このフォルダで使用する便利関数
-from typing import Dict, List
+from typing import Callable, Dict, List
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import squareform
@@ -9,6 +9,7 @@ from src.plot.util.process_report import count_gene
 from src.util.bedfile import load_replicateIDR_report, read_annotated_bed
 from src.util.similarity_protein import InteractionSimilarity, ProteinSimilarity
 from src.util.similarity_strategy import (
+    SimilarityStrategy,
     TAPE,
     BlastP,
     Cosine,
@@ -34,7 +35,33 @@ def target_report(threshold_gene_num: int, biosample: str):
     return target_report
 
 
-def metrics(report: pd.DataFrame):
+def similarity_strategy_dict():
+    protein_strategies = {
+        "TAPE": lambda report: TAPE(report),
+        "keyword": lambda report: KeywordCosine(report),
+        "blastp": lambda report: BlastP(
+            report, symmetric=True, symmetric_method="average"
+        ),
+    }
+    interaction_strategies = {
+        "simpson": lambda report: Simpson(report),
+        "lift": lambda report: Lift(report),
+        "cosine": lambda report: Cosine(report),
+    }
+    return protein_strategies, interaction_strategies
+
+
+def metrics(
+    report: pd.DataFrame,
+    protein_strategies: Dict[
+        str,
+        Callable[[pd.DataFrame], SimilarityStrategy],
+    ],
+    interaction_strategies: Dict[
+        str,
+        Callable[[pd.DataFrame], SimilarityStrategy],
+    ],
+):
     """統計値を整形する
     タンパク質の類似度: TAPE(cosine distance), blastp(bit score), keyword(cosine distance)
     相互作用の遺伝子の類似度: simpson index
@@ -54,17 +81,16 @@ def metrics(report: pd.DataFrame):
 
     REPORT_COLUMNS = ["Dataset", "Target label", "Biosample name"]
 
-    data = pd.DataFrame(
-        {
-            "TAPE": protein_similarity(TAPE(report=report)),
-            "keyword": protein_similarity(KeywordCosine(report=report)),
-            "blastp": protein_similarity(BlastP(report=report)),
-            "simpson": interaction_similarity(Simpson(report=report)),
-            "lift": interaction_similarity(Lift(report=report)),
-            "cosine": interaction_similarity(Cosine(report=report)),
-        }
-    )
+    dict_data = {}
+    for label, strategy in protein_strategies.items():
+        dict_data[label] = protein_similarity(strategy(report))
+
+    for label, strategy in interaction_strategies.items():
+        dict_data[label] = interaction_similarity(strategy(report))
+
+    data = pd.DataFrame(dict_data)
     index_n = np.where(np.triu(squareform(np.ones(data.shape[0]))))
+
     desc = pd.concat(
         [
             report.iloc[index_n[0]]

@@ -11,6 +11,7 @@ from src.util.similarity_protein import InteractionSimilarity
 from src.util.similarity_strategy import Simpson
 
 from src.plot.interaction_metrics.representative import (
+    similarity_strategy_dict,
     convert_to_dict_exp_pair_by_keyword,
     get_keyword,
     target_report,
@@ -35,7 +36,7 @@ if not os.path.exists(SAVEDIR):
 
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-data = metrics(report)
+data = metrics(report, *similarity_strategy_dict())
 
 # %%
 inter_similarity = InteractionSimilarity()
