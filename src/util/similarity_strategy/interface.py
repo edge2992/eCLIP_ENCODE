@@ -73,7 +73,7 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
             elif self.symmetric_method == "max":
                 values = values.max(axis=0)
             elif self.symmetric_method == "min":
-                values = values.min(axis=1)
+                values = values.min(axis=0)
             else:
                 raise ValueError(
                     "symmetric_method must be average, max or min",
@@ -115,6 +115,13 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
                     dm[k] = get_similarity(label[i], label[j])
                     k += 1
             return dm
+
+        def is_symmetric(matrix: np.ndarray) -> bool:
+            """対称行列である"""
+            return np.allclose(matrix, matrix.T, atol=1e-8)
+
+        if not is_symmetric(similarities.values):
+            raise ValueError("similarities must be symmetric matrix")
 
         labels: List[str] = self.report["Dataset"].to_list()
         return pd.DataFrame(

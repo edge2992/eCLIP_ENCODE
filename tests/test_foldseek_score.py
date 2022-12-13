@@ -42,7 +42,9 @@ def test_foldseek_score_transform():
     N_TEST = 15
     report = load_replicateIDR_report().head(N_TEST)
     similarity = ProteinSimilarity()
-    similarity.setStrategy(FoldSeekTMScore(report=report))
+    similarity.setStrategy(
+        FoldSeekTMScore(report=report, symmetric=True, symmetric_method="min")
+    )
     stringdb_data = similarity.executeStrategy()
     data = similarity.strategy.transform(stringdb_data)
     assert data.shape[0] == N_TEST
@@ -51,7 +53,6 @@ def test_foldseek_score_transform():
     report_ind = report.set_index("Dataset", drop=True)
     assert similarity.strategy.loadfile is not None
     expected_table = read_aln_tmscore(similarity.strategy.loadfile)
-    # protein_converter = {v.split("|")[1]: k for k, v in idmapping().items()}
     protein_converter = {k: v.split("|")[1] for k, v in idmapping().items()}
 
     for index, row in data.iterrows():
@@ -69,13 +70,9 @@ def test_foldseek_score_transform():
             if protein1 == protein2:
                 assert value == 0
             elif value == 0:
+                # TODO: 片方のデータしかない場合minを取ると値が0になってしまう (修正する)
                 continue
             else:
                 assert expected is not None, f"{protein1}, {protein2}"
-                # TODO: 対象行列ではなかったので調査する, TMScoreの定義による可能性が高い。平均を取るなどの処理をしたらどうか。
-                assert any(
-                    [
-                        np.isclose(expected_value, value)
-                        for expected_value in expected["TMscore"].values
-                    ]
-                )
+                expected_score = min(expected["TMscore"].values)
+                assert np.isclose(expected_score, value)

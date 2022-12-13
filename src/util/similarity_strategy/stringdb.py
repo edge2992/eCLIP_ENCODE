@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Callable, Union
 import pandas as pd
 
 from src.util.similarity_strategy import ProteinSimilarityStrategy
@@ -15,9 +15,15 @@ class DirectStringScore(ProteinSimilarityStrategy):
     """
 
     def __init__(
-        self, report: Union[None, pd.DataFrame] = None, metrics: str = "score"
+        self,
+        report: Union[None, pd.DataFrame] = None,
+        loadfile: Union[None, str] = None,
+        symmetric: bool = False,
+        symmetric_method: str = "average",
+        label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
+        metrics: str = "score",
     ):
-        super().__init__(report=report)
+        super().__init__(report, loadfile, symmetric, symmetric_method, label_method)
         assert metrics in [
             "score",
             "nscore",
