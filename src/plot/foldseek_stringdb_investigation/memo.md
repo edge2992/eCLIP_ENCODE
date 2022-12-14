@@ -24,4 +24,4 @@ https://ravilabio.info/notes/bioinformatics/e-value-bitscore.html
 
 ### TODO: 
 - [x] 閾値を50あたりにして分布を比較してみる
-- homologyスコアをstringdbから取得して, blastpの結果と比較する
+- [x] homologyスコアをstringdbから取得して, blastpの結果と比較する

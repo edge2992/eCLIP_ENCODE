@@ -85,3 +85,32 @@ def test_stringdb_transform():
                 assert not expected.empty
                 expected_value = expected["score"].values[0]  # type: ignore
                 assert np.isclose(expected_value, value)  # type: ignore
+
+
+def test_stringdb_homology():
+    from src.util.download.stringdb import (
+        download_homology_metrics,
+        ENCODEprotein2stringdb,
+    )
+    from src.util.similarity_protein import ProteinSimilarity
+    from src.util.similarity_strategy import BlastP
+    import pandas as pd
+    import numpy as np
+
+    data = download_homology_metrics()
+    converter = {v: k for k, v in ENCODEprotein2stringdb("stringId").items()}
+    data_converted = pd.DataFrame(
+        {
+            "protein_1": data["stringId_A"].apply(lambda x: converter[x]),
+            "protein_2": data["stringId_B"].apply(lambda x: converter[x]),
+            "bitscore": data["bitscore"],
+        }
+    )
+    print(data_converted.head())
+    similarity = ProteinSimilarity()
+    similarity.setStrategy(BlastP(symmetric=True, symmetric_method="max"))
+    expected = similarity.executeStrategy()
+    for index, row in data_converted.iterrows():
+        assert np.isclose(
+            expected.loc[row["protein_1"], row["protein_2"]], row["bitscore"], 2
+        )
