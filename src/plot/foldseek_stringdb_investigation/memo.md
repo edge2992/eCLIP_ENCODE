@@ -27,3 +27,15 @@
 
 - [x] 閾値を50あたりにして分布を比較してみる
 - [x] homologyスコアをstringdbから取得して, blastpの結果と比較する
+
+
+## TM-scoreを比較する
+
+- keywordごとに分布を見る
+- interaction scoreと比較する
+
+## 例を見て理解を深める
+
+- stringdb_tscore > 0.9で、jaccardスコアが高いものを列挙する
+- stringdb_tscore < 0.2で, jaccardスコアが高いものを列挙する
+- stringdb scoreが1に近いものを確認する

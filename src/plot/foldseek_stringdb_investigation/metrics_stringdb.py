@@ -1,6 +1,5 @@
 # %%
 import os
-from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,6 +9,10 @@ from dotenv import load_dotenv
 
 from src.util.similarity_protein import ProteinSimilarity
 from src.util.similarity_strategy import DirectStringScore, KeywordCosine
+from src.plot.foldseek_stringdb_investigation.plot_utils import (
+    plot_distplots,
+    ConditionLt,
+)
 
 sns.set(font_scale=1.4)
 
@@ -78,29 +81,29 @@ print(data.shape)
 # https://towardsdatascience.com/sorry-but-sns-distplot-just-isnt-good-enough-this-is-though-ef2ddbf28078
 
 
-def plot_distplots(
-    data: pd.DataFrame,
-    x: str,
-    hue: str,
-    thresholds: List,
-    xlim: Tuple = (-0.1, 1.1),
-    ylim: Tuple = (0.0, 4.0),
-):
-    aspectes = 5
-    fig, axes = plt.subplots(
-        len(thresholds), 1, figsize=(aspectes * 4, len(thresholds) * 4)
-    )
+# def plot_distplots(
+#     data: pd.DataFrame,
+#     x: str,
+#     hue: str,
+#     thresholds: List,
+#     xlim: Tuple = (-0.1, 1.1),
+#     ylim: Tuple = (0.0, 4.0),
+# ):
+#     aspectes = 5
+#     fig, axes = plt.subplots(
+#         len(thresholds), 1, figsize=(aspectes * 4, len(thresholds) * 4)
+#     )
 
-    for i, threshold in enumerate(thresholds):
-        sample = data[data[hue] < threshold]
+#     for i, threshold in enumerate(thresholds):
+#         sample = data[data[hue] < threshold]
 
-        sns.kdeplot(sample, x=x, ax=axes[i])
-        axes[i].set_title(f"{hue} < {threshold} (n={sample.shape[0]})")
-        axes[i].set_xlim(xlim)
-        axes[i].set_ylim(ylim)  # type: ignore
+#         sns.kdeplot(sample, x=x, ax=axes[i])
+#         axes[i].set_title(f"{hue} < {threshold} (n={sample.shape[0]})")
+#         axes[i].set_xlim(xlim)
+#         axes[i].set_ylim(ylim)  # type: ignore
 
-    fig.tight_layout()
-    return fig
+#     fig.tight_layout()
+#     return fig
 
 
 # %%
@@ -118,8 +121,9 @@ fig.savefig(
 fig = plot_distplots(
     data_nonzero,
     x="stringdb_score",
-    hue="keyword_cosine",
-    thresholds=[0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0],
+    thresholds=[
+        ConditionLt("keyword_cosine", t) for t in [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]
+    ],
 )
 fig.savefig(
     os.path.join(SAVEDIR, "distplots_stringdb_score_keyword_cosine.png"),
