@@ -123,7 +123,7 @@ fig.savefig(
 keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
 
 # %%
-splice_data = data.iloc[keyword_experiment_pair["Spliceosome"]]
+splice_data: pd.DataFrame = data.iloc[keyword_experiment_pair["Spliceosome"]]  # type: ignore
 splice_data[splice_data["simpson"] >= 0.75].sort_values(
     "simpson", ascending=False
 ).to_csv(os.path.join(SAVEDIR, f"{BIOSAMPLE}_Spliceosome_high_simpson.csv"))
