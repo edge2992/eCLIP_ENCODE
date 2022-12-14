@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.plot.interaction_metrics.representative import (
+    similarity_strategy_dict,
     convert_to_dict_exp_pair_by_keyword,
     target_report,
     metrics,
@@ -75,7 +76,7 @@ def plot_pairplot_by_keyword(
 # %%
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-data = metrics(report)
+data = metrics(report, *similarity_strategy_dict())
 
 keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
 keyword_num_series = pd.Series(

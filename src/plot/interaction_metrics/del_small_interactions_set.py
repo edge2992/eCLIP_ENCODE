@@ -7,6 +7,7 @@ import seaborn as sns
 from dotenv import load_dotenv
 
 from src.plot.interaction_metrics.representative import (
+    similarity_strategy_dict,
     target_report,
     metrics,
     describe_dataset_pair,
@@ -27,7 +28,7 @@ if not os.path.exists(SAVEDIR):
 
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-data = metrics(report)
+data = metrics(report, *similarity_strategy_dict())
 # %%
 tape_data = data.sort_values("TAPE").reset_index(drop=True)
 tape_data["label"] = [

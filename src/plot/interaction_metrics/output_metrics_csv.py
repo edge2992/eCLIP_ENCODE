@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 
 from src.plot.interaction_metrics.representative import (
+    similarity_strategy_dict,
     target_report,
     metrics,
 )
@@ -22,7 +23,7 @@ if not os.path.exists(SAVEDIR):
 
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-data = metrics(report)
+data = metrics(report, *similarity_strategy_dict())
 
 # %%
 data.head()

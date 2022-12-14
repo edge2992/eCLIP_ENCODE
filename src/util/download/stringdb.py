@@ -17,15 +17,23 @@ def query_replicateIDR_protein() -> List:
     return list(report["Target label"].unique())
 
 
-def query_preferredName_replicateIDR_protein() -> List:
+def query_name_replicateIDR_protein(column: str) -> List:
     data = identify_protein()
-    return data["preferredName"].to_list()  # type: ignore
+    return data[column].to_list()  # type: ignore
+
+
+def query_preferredName_replicateIDR_protein() -> List:
+    return query_name_replicateIDR_protein("preferredName")
+
+
+def ENCODEprotein2stringdb(column: str) -> Dict:
+    from_protein = query_replicateIDR_protein()
+    stringdb_protein = query_name_replicateIDR_protein(column)
+    return dict(zip(from_protein, stringdb_protein))
 
 
 def ENCODEprotein2preferredName() -> Dict:
-    from_protein = query_replicateIDR_protein()
-    preferred_protein = query_preferredName_replicateIDR_protein()
-    return dict(zip(from_protein, preferred_protein))
+    return ENCODEprotein2stringdb("preferredName")
 
 
 def identify_protein(

@@ -9,13 +9,18 @@ KEYWORD_FILE = "/mnt/H/MYWORK/eCLIP_ENCODE/data/uniprot/keyword_list.tsv"
 KEYWORD_PROTEIN = "/mnt/H/MYWORK/eCLIP_ENCODE/data/uniprot/reviewed_keyword.tsv"
 
 
+def load_uniprot_report(is_unique: bool = True) -> pd.DataFrame:
+    df = pd.read_table(
+        os.path.join(PROJECT_PATH, "data/uniprot", "reviewed.tsv")
+    ).sort_values("Length", ascending=False)
+    if is_unique:
+        df.drop_duplicates("From", keep="first", inplace=True)
+    return df.reset_index(drop=True)
+
+
 def idmapping():
     """uniprot idmappingからダウンロードしたテーブルデータを使用して、uniprotのproteinidとeCLIPで使われているタンパク質の対応表を作成する"""
-    df = (
-        pd.read_table(os.path.join(PROJECT_PATH, "data/uniprot", "reviewed.tsv"))
-        .sort_values("Length", ascending=False)
-        .drop_duplicates("From")
-    )
+    df = load_uniprot_report(is_unique=True)
     df["label"] = "sp|" + df["Entry"] + "|" + df["Entry Name"]
     return df[["From", "label"]].set_index("From").to_dict()["label"]
 
