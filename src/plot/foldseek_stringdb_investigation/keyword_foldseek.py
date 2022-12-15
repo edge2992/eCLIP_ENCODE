@@ -3,6 +3,7 @@
 # %%
 import os
 
+import pandas as pd
 import seaborn as sns
 from dotenv import load_dotenv
 
@@ -12,10 +13,14 @@ from src.plot.foldseek_stringdb_investigation.plot_utils import (
 )
 from src.plot.interaction_metrics.representative import (
     convert_to_dict_exp_pair_by_keyword,
-    metrics,
     target_report,
 )
-from src.util.similarity_strategy import TAPE, FoldSeekTMScore, Jaccard, Simpson
+from src.util.similarity_strategy import (
+    FoldSeekTMScore,
+    Jaccard,
+    Simpson,
+)
+from src.util.metrics import Metrics
 
 sns.set(font_scale=1.4)
 
@@ -39,25 +44,16 @@ BIOSAMPLE = "HepG2"
 
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-interaction_strategies = {
-    "simpson": lambda report: Simpson(report),
-    "jaccard": lambda report: Jaccard(report),
-}
-protein_strategies = {
-    "TAPE": lambda report: TAPE(report),
-    "foldseek_tmscore_min": lambda report: FoldSeekTMScore(
-        report, symmetric=True, symmetric_method="min"
-    ),
-    "foldseek_tmscore_max": lambda report: FoldSeekTMScore(
-        report, symmetric=True, symmetric_method="max"
-    ),
-    "foldseek_tmscore_avg": lambda report: FoldSeekTMScore(
-        report, symmetric=True, symmetric_method="average"
-    ),
-}
 
-data = metrics(report, protein_strategies, interaction_strategies)
-
+data: pd.DataFrame = Metrics(report)(
+    [
+        FoldSeekTMScore(symmetric=True, symmetric_method="min"),
+        FoldSeekTMScore(symmetric=True, symmetric_method="max"),
+        FoldSeekTMScore(symmetric=True, symmetric_method="average"),
+        Simpson(),
+        Jaccard(),
+    ],
+)  # type: ignore
 # %%
 keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
 # %%
@@ -65,7 +61,7 @@ keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
 investigation_metrics = [
     "foldseek_tmscore_min",
     "foldseek_tmscore_max",
-    "foldseek_tmscore_avg",
+    "foldseek_tmscore_average",
 ]
 plot_data = construct_plotting_data(
     data, keyword_experiment_pair, investigation_metrics

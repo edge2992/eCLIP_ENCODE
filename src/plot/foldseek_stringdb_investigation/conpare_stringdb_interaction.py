@@ -2,7 +2,6 @@
 # %% import
 import os
 import textwrap
-from typing import Callable, Dict
 
 import pandas as pd
 import seaborn as sns
@@ -12,11 +11,11 @@ from src.plot.foldseek_stringdb_investigation.plot_utils import (
     ConditionGt,
     plot_distplots,
 )
-from src.plot.interaction_metrics.representative import metrics, target_report
+from src.util.metrics import Metrics
+from src.plot.interaction_metrics.representative import target_report
 from src.util.similarity_strategy import (
     DirectStringScore,
     Jaccard,
-    SimilarityStrategy,
     Simpson,
 )
 
@@ -43,18 +42,16 @@ BIOSAMPLE = "HepG2"
 
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-interaction_strategies = {
-    "simpson": lambda report: Simpson(report),
-    "jaccard": lambda report: Jaccard(report),
-}
-protein_strategies: Dict[str, Callable[[pd.DataFrame], SimilarityStrategy]] = {
-    "stringdb_score": lambda report: DirectStringScore(report, metrics="score"),
-    "stringdb_ascore": lambda report: DirectStringScore(report, metrics="ascore"),
-    "stringdb_escore": lambda report: DirectStringScore(report, metrics="escore"),
-    "stringdb_tscore": lambda report: DirectStringScore(report, metrics="tscore"),
-}
-
-data = metrics(report, protein_strategies, interaction_strategies, "stringdb_score")
+data: pd.DataFrame = Metrics(report)(
+    [
+        DirectStringScore(report, metrics="score"),
+        DirectStringScore(report, metrics="ascore"),
+        DirectStringScore(report, metrics="escore"),
+        DirectStringScore(report, metrics="tscore"),
+        Simpson(),
+        Jaccard(),
+    ]
+)  # type: ignore
 
 
 # %%
@@ -74,8 +71,8 @@ splot = sns.pairplot(
         "stringdb_tscore",
     ],
     y_vars=[
-        "simpson",
-        "jaccard",
+        "Simpson",
+        "Jaccard",
     ],
     plot_kws={"alpha": 0.5},
 )
@@ -103,7 +100,7 @@ for score_metrics in [
     print(data.shape, "->", nonzero_data.shape)
     fig = plot_distplots(
         nonzero_data,
-        x="jaccard",
+        x="Jaccard",
         thresholds=[ConditionGt(score_metrics, t) for t in [0.1, 0.3, 0.5, 0.7, 0.9]],
         xlim=(-0.1, 0.7),
         ylim=(0.0, 7.0),
@@ -115,7 +112,7 @@ for score_metrics in [
 
     fig = plot_distplots(
         nonzero_data,
-        x="simpson",
+        x="Simpson",
         thresholds=[ConditionGt(score_metrics, t) for t in [0.1, 0.3, 0.5, 0.7, 0.9]],
         xlim=(-0.1, 0.9),
         ylim=(0.0, 5.0),

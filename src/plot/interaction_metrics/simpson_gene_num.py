@@ -2,21 +2,28 @@
 
 # %%
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
 from typing import List
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 from dotenv import load_dotenv
-from src.util.similarity_protein import InteractionSimilarity
-from src.util.similarity_strategy import Simpson
 
 from src.plot.interaction_metrics.representative import (
-    similarity_strategy_dict,
     convert_to_dict_exp_pair_by_keyword,
+    describe_dataset_pair,
     get_keyword,
     target_report,
-    metrics,
-    describe_dataset_pair,
+)
+from src.util.metrics import Metrics
+from src.util.similarity_protein import InteractionSimilarity
+from src.util.similarity_strategy import (
+    TAPE,
+    BlastP,
+    Cosine,
+    KeywordCosine,
+    Lift,
+    Simpson,
 )
 
 load_dotenv()
@@ -36,7 +43,16 @@ if not os.path.exists(SAVEDIR):
 
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-data = metrics(report, *similarity_strategy_dict())
+data: pd.DataFrame = Metrics(report)(
+    [
+        TAPE(),
+        KeywordCosine(),
+        BlastP(symmetric=True, symmetric_method="avg"),
+        Simpson(),
+        Lift(),
+        Cosine(),
+    ]
+)  # type: ignore
 
 # %%
 inter_similarity = InteractionSimilarity()
@@ -67,7 +83,7 @@ extra_data.head()
 
 # %%
 
-METRICS_COLUMNS = ["simpson", "lift", "cosine"]
+METRICS_COLUMNS = ["Simpson", "Lift", "Cosine"]
 for metric in METRICS_COLUMNS:
     x1 = extra_data["Gene_1"].to_numpy()
     x2 = extra_data["Gene_2"].to_numpy()
@@ -94,7 +110,7 @@ CHECK_TOP_N = 30
 keywords: List[str] = []
 
 
-METRICS_COLUMNS = ["simpson", "lift", "cosine"]
+METRICS_COLUMNS = ["Simpson", "Lift", "Cosine"]
 keyword_common = []
 for metric in METRICS_COLUMNS:
     for index, row in (
@@ -124,15 +140,15 @@ keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
 
 # %%
 splice_data: pd.DataFrame = data.iloc[keyword_experiment_pair["Spliceosome"]]  # type: ignore
-splice_data[splice_data["simpson"] >= 0.75].sort_values(
-    "simpson", ascending=False
+splice_data[splice_data["Simpson"] >= 0.75].sort_values(
+    "Simpson", ascending=False
 ).to_csv(os.path.join(SAVEDIR, f"{BIOSAMPLE}_Spliceosome_high_simpson.csv"))
 
 
 # %%
 data[
     (data["TAPE"].rank() > (len(data) / 2))
-    & (data["simpson"].rank(ascending=False) < 300)
+    & (data["Simpson"].rank(ascending=False) < 300)
 ].to_csv(os.path.join(SAVEDIR, f"{BIOSAMPLE}_low_TAPE_high_simpson.csv"))
 
 # %%

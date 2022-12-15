@@ -38,26 +38,3 @@ def test_metrics_multiple():
     for index, row in data.iterrows():
         assert row["TAPE"] == expected_tape.loc[index, "TAPE"]  # type: ignore
         assert row["Dice"] == expected_dice.loc[index, "Dice"]  # type: ignore
-
-
-def test_metrics():
-    from src.util.metrics.metrics import Metrics
-    from src.util.bedfile import load_replicateIDR_report
-    from src.util.similarity_strategy import TAPE, Jaccard, Simpson
-    from src.plot.interaction_metrics.representative import (
-        metrics,
-        similarity_strategy_dict,
-    )
-
-    TEST_N = 10
-
-    report = load_replicateIDR_report().head(TEST_N)
-    sample = metrics(report, *similarity_strategy_dict())
-    data = (
-        Metrics(report)([TAPE(), Jaccard(), Simpson()], add_description=True)
-        .sort_values("TAPE")
-        .reset_index(drop=True)
-    )
-    for index, row in data.iterrows():
-        assert row["TAPE"] == sample.loc[index, "TAPE"]
-        assert row["Simpson"] == sample.loc[index, "simpson"]

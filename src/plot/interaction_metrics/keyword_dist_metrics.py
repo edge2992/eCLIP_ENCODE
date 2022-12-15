@@ -12,10 +12,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.plot.interaction_metrics.representative import (
-    similarity_strategy_dict,
     convert_to_dict_exp_pair_by_keyword,
     target_report,
-    metrics,
+)
+from src.util.metrics import Metrics
+
+from src.util.similarity_strategy import (
+    TAPE,
+    KeywordCosine,
+    BlastP,
+    Simpson,
+    Lift,
+    Cosine,
 )
 
 load_dotenv()
@@ -47,7 +55,7 @@ def plot_pairplot_by_keyword(
         return sample
 
     sample = make_hue_label()
-    sample["log_blastp (bit score)"] = np.log1p(sample["blastp"])
+    sample["log_blastp (bit score)"] = np.log1p(sample["Blastp"])
 
     palette = {
         keyword: sns.color_palette()[1],  # type: ignore
@@ -56,7 +64,7 @@ def plot_pairplot_by_keyword(
 
     splot = sns.pairplot(
         sample,
-        vars=["TAPE", "keyword", "log_blastp (bit score)", "simpson"],
+        vars=["TAPE", "KeywordCosine", "log_blastp (bit score)", "Simpson"],
         hue="label",
         corner=True,
         palette=palette,
@@ -76,8 +84,16 @@ def plot_pairplot_by_keyword(
 # %%
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-data = metrics(report, *similarity_strategy_dict())
-
+data: pd.DataFrame = Metrics(report)(
+    [
+        TAPE(),
+        KeywordCosine(),
+        BlastP(symmetric=True, symmetric_method="avg"),
+        Simpson(),
+        Lift(),
+        Cosine(),
+    ]
+)  # type: ignore
 keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
 keyword_num_series = pd.Series(
     {key: len(values) for key, values in keyword_experiment_pair.items()}
@@ -114,7 +130,7 @@ def calc_precision_at_k(
     keywordを持つものは上位K個のうち何割入っているか"""
     if k == 0 or keyword not in keyword_exp_pair:
         return 0.0
-    true_k = data.sort_values("simpson", ascending=False).iloc[:k].index.to_list()
+    true_k = data.sort_values("Simpson", ascending=False).iloc[:k].index.to_list()
     precision_at_k = len(set(keyword_exp_pair[keyword]) & set(true_k)) / k
     return precision_at_k
 
@@ -126,7 +142,7 @@ def recall_at_k(
     keywordを持つものはkeywordをもつもの全体のうち何割入っているか"""
     if k == 0 or keyword not in keyword_exp_pair:
         return 0.0
-    true_k = data.sort_values("simpson", ascending=False).iloc[:k].index.to_list()
+    true_k = data.sort_values("Simpson", ascending=False).iloc[:k].index.to_list()
     recall_at_k = len(set(keyword_exp_pair[keyword]) & set(true_k)) / len(
         keyword_exp_pair[keyword]
     )

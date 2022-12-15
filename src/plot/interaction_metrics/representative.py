@@ -19,6 +19,8 @@ from src.util.similarity_strategy import (
 from src.util.get_bed_path import get_formatted_file_path
 from src.util.bed_format_strategy import FormatStrategy
 from src.util.uniprot import load_keyword_report
+from src.eclip import Compare, Dataset
+from src.util.metrics.metrics import Metrics
 
 
 def target_report(threshold_gene_num: int, biosample: str):
@@ -139,20 +141,16 @@ def convert_to_dict_exp_pair_by_keyword(data: pd.DataFrame):
 
 
 def describe_dataset_pair(row: pd.Series):
-    gene1 = get_geneset(row["Dataset_1"])
-    gene2 = get_geneset(row["Dataset_2"])
-    keyword1 = get_keyword(row["Dataset_1"])
-    keyword2 = get_keyword(row["Dataset_2"])
+    dataset1 = Dataset(row["Dataset_1"])
+    dataset2 = Dataset(row["Dataset_2"])
+    compare = Compare([dataset1, dataset2])
 
     print("-" * 20)
-    print("dataset1: {}".format(row["Dataset_1"]))
-    print("dataset2: {}".format(row["Dataset_2"]))
-    print("protein1: {}".format(row["Target label_1"]))
-    print("protein2: {}".format(row["Target label_2"]))
-    print("gene1: {}".format(len(gene1)))
-    print("gene2: {}".format(len(gene2)))
-    print("keyword1: {}".format(len(keyword1)))
-    print("keyword2: {}".format(len(keyword2)))
-    print("keyword intersection: {}".format(list(set(keyword1) & set(keyword2))))
-    print("intersection: {}".format(len(set(gene1) & set(gene2))))
-    print("simpson: {}".format(row["simpson"]))
+    print(compare)
+    print("gene1: {}".format(len(dataset1.genes)))
+    print("gene2: {}".format(len(dataset2.genes)))
+    print("gene intersection: {}".format(len(compare.gene_intersection)))
+    print("keyword1: {}".format(len(dataset1.keywords)))
+    print("keyword2: {}".format(len(dataset2.keywords)))
+    print("keyword intersection: {}".format(compare.keyword_intersection))
+    print("simpson: {}".format(row["Simpson"]))
