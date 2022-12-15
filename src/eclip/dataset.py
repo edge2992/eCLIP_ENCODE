@@ -5,7 +5,7 @@ import pandas as pd
 from src.util.bed_format_strategy import FormatStrategy
 from src.util.bedfile import load_report, read_annotated_bed
 from src.util.get_bed_path import get_formatted_file_path
-from src.util.uniprot import load_keyword_report
+from src.eclip.uniprot.keyword import Keyword
 
 
 class Dataset:
@@ -41,10 +41,7 @@ class Dataset:
         if hasattr(self, "_keywords"):
             return self._keywords
 
-        keywords = load_keyword_report().set_index("From")
-        keyword_str: str = keywords.loc[self.protein, "Keywords"]  # type: ignore
-        self._keywords = [key.strip() for key in keyword_str.split(";")]
-        return self._keywords
+        return Keyword()(self.protein)
 
     @property
     def genes(self):
