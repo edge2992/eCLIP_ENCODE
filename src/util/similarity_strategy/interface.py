@@ -46,13 +46,13 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
         symmetric: bool = False,
-        symmetric_method: str = "average",
+        symmetric_method: str = "avg",
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
     ):
         super().__init__(report, loadfile, label_method)
 
-        if symmetric_method not in ["average", "max", "min"]:
-            raise ValueError("symmetric_method must be average, max or min")
+        if symmetric_method not in ["avg", "max", "min"]:
+            raise ValueError("symmetric_method must be avg, max or min")
         self.symmetric = symmetric
         self.symmetric_method = symmetric_method
 
@@ -71,7 +71,7 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
         values = similarities.values
         if self.symmetric:
             values = np.stack([values, values.T])
-            if self.symmetric_method == "average":
+            if self.symmetric_method == "avg":
                 values = values.sum(axis=0) / 2
             elif self.symmetric_method == "max":
                 values = values.max(axis=0)

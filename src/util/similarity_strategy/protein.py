@@ -117,7 +117,7 @@ class BlastP(ProteinSimilarityStrategy):
         return subprocess.Popen(cmd_makeblastdb, shell=True)
 
     def __repr__(self) -> str:
-        return "balstp"
+        return "Blastp"
 
 
 class TAPE(ProteinSimilarityStrategy):
@@ -172,6 +172,6 @@ class KeywordCosine(ProteinSimilarityStrategy):
             index=keywords["label"].tolist(),
             columns=keywords["label"].tolist(),
         )
-    
+
     def __repr__(self) -> str:
         return "KeywordCosine"

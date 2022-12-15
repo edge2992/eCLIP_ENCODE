@@ -33,7 +33,7 @@ class FoldSeekTMScore(ProteinSimilarityStrategy):
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
         symmetric: bool = False,
-        symmetric_method: str = "average",
+        symmetric_method: str = "avg",
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
         e_value: float = 1e9,
     ):
@@ -66,3 +66,6 @@ class FoldSeekTMScore(ProteinSimilarityStrategy):
     def _idmapping(self):
         """foldseek column name -> eCLIP protein name"""
         return {v: k for k, v in idmapping_mmcif().items()}
+
+    def __repr__(self) -> str:
+        return f"foldseek_tmscore_{self.symmetric_method}"
