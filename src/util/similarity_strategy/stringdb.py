@@ -55,3 +55,6 @@ class DirectStringScore(ProteinSimilarityStrategy):
 
     def _idmapping(self):
         return {v: k for k, v in ENCODEprotein2preferredName().items()}
+
+    def __repr__(self) -> str:
+        return f"DirectStringScore(metrics={self.metrics})"

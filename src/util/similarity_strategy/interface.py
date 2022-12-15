@@ -29,6 +29,9 @@ class SimilarityStrategy(ABC):
         self.loadfile = loadfile
         self.label_method = label_method
 
+    def set_report(self, report: pd.DataFrame):
+        self.report = report
+
     @abstractmethod
     def execute(self) -> pd.DataFrame:
         raise NotImplementedError()
