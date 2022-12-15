@@ -73,7 +73,7 @@ class KeywordConfidence:
         target_labels = self.labels(targets)
         data = pd.DataFrame(
             {
-                str(condition): self.keyword_report["label"].isin(target_labels),
+                str(condition): self.keyword_report["label"].isin(target_labels),  # type: ignore
                 keyword: self.keyword_report["keyword"] == keyword,
             }
         )
@@ -97,6 +97,10 @@ class KeywordConfidence:
         if not hasattr(self, "__keyword_report"):
             self.__keyword_report = self.__load_label_keyword_report()
         return self.__keyword_report
+
+    @property
+    def keywords(self):
+        return self.keyword_report["keyword"].unique().tolist()
 
     def __load_label_keyword_report(self):
         if not os.path.exists(self.label_keyword_report_path):

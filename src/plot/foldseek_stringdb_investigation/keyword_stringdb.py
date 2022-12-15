@@ -8,14 +8,12 @@ import seaborn as sns
 from dotenv import load_dotenv
 
 from src.plot.foldseek_stringdb_investigation.plot_utils import (
-    construct_plotting_data,
     plot_boxplot_by_keyword,
 )
 from src.plot.interaction_metrics.representative import (
-    convert_to_dict_exp_pair_by_keyword,
     target_report,
 )
-from src.util.metrics import Metrics
+from src.util.metrics import Metrics, KeywordConfidence, ConditionGt
 from src.util.similarity_strategy import TAPE, DirectStringScore, Jaccard, Simpson
 
 sns.set(font_scale=1.4)
@@ -51,8 +49,50 @@ data: pd.DataFrame = Metrics(report)(
 )  # type: ignore
 
 # %%
-keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
+# keyword_experiment_pair = convert_to_dict_exp_pair_by_keyword(data)
+keyword_confidence = KeywordConfidence(data)
+keyword_experiment_pair = keyword_confidence.keywords_dict
 # %%
+from src.eclip import Dataset, Compare
+
+for index, row in data.iterrows():
+    print(Compare([Dataset(row["Dataset_1"]), Dataset(row["Dataset_2"])]).label)
+    break
+
+# %%
+
+
+from typing import List
+
+
+def plotting_data(data: pd.DataFrame, keyword_experiment_pair, metrics: List):
+    """plot_boxplot_by_keywordで作図するデータを作成する
+
+    Args:
+        data (pd.DataFrame): from src.plot.interaction_metrics.representativeのmetricsで作成したデータ
+        keyword_experiment_pair (_type_): convert_to_dict_exp_pair_by_keywordで作成したデータ
+        metrics (List): 対象とするmetrics
+
+    Returns:
+        _type_: _description_
+    """
+    from src.eclip import Dataset, Compare
+
+    plot_data = pd.DataFrame()
+    tmp = data.copy()
+    tmp["label"] = data.apply(
+        lambda row: Compare(
+            [Dataset(row["Dataset_1"]), Dataset(row["Dataset_2"])]
+        ).label,
+        axis=1,
+    )
+    tmp.set_index("label", inplace=True, drop=True)
+    for keyword, value in keyword_experiment_pair.items():
+        sample = tmp.loc[value, :][metrics].copy().reset_index()
+        sample["label"] = f"{keyword} (#{len(value)})"
+        plot_data = pd.concat([plot_data, sample], axis=0)
+    return plot_data
+
 
 investigation_metrics = [
     "stringdb_score",
@@ -60,12 +100,29 @@ investigation_metrics = [
     "stringdb_escore",
     "stringdb_tscore",
 ]
-plot_data = construct_plotting_data(
-    data, keyword_experiment_pair, investigation_metrics
-)
+plot_data = plotting_data(data, keyword_experiment_pair, investigation_metrics)
 
 for met in investigation_metrics:
     fig = plot_boxplot_by_keyword(plot_data, met)
     fig.savefig(os.path.join(SAVEDIR, f"boxplot_{met}.png"), bbox_inches="tight")
+
+# %%
+from tqdm import tqdm
+
+condition = ConditionGt("stringdb_score", 0.5)
+dd = []
+for key in tqdm(keyword_confidence.keywords):
+    ratio, p = keyword_confidence.keyword_confidence(key, condition)
+    dd.append(
+        {
+            "keyword": key,
+            "odds_ratio": ratio,
+            "p_value": p,
+        }
+    )
+
+# %%
+v = pd.DataFrame(dd)
+v.sort_values("p_value", ascending=True)
 
 # %%
