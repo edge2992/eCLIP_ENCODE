@@ -46,3 +46,14 @@ def HepG2_1e3_metrics() -> pd.DataFrame:
     data = Metrics(__HepG2_1e3_report())([Jaccard()], add_description=True)
     assert isinstance(data, pd.DataFrame)
     return data
+
+
+@pytest.fixture
+def HepG2_1e3_nonzero_stringdb_metrics() -> pd.DataFrame:
+    from src.util.metrics import Metrics
+    from src.util.metrics.condition import ConditionNeq
+    from src.util.similarity_strategy import DirectStringScore
+
+    data = Metrics(__HepG2_1e3_report())(DirectStringScore(), add_description=True)
+    assert isinstance(data, pd.DataFrame)
+    return data[ConditionNeq("stringdb_score", 0)(data)]

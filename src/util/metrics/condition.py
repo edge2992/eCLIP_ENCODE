@@ -11,6 +11,9 @@ class Condition(ABC):
     def __call__(self, row):
         raise NotImplementedError()
 
+    def __repr__(self):
+        raise NotImplementedError()
+
 
 class ConditionGt(Condition):
     def __init__(self, hue: str, threshold: float):
@@ -45,3 +48,47 @@ class ConditionAnd(Condition):
 
     def __repr__(self):
         return f"{' and '.join([str(condition) for condition in self.conditions])}"
+
+
+class ConditionNeq(Condition):
+    def __init__(self, hue: str, threshold: float):
+        super().__init__(hue, threshold)
+
+    def __call__(self, data: pd.DataFrame) -> pd.Series:
+        return data[self.hue] != self.threshold
+
+    def __repr__(self):
+        return f"{self.hue} != {self.threshold}"
+
+
+class ConditionEq(Condition):
+    def __init__(self, hue: str, threshold: float):
+        super().__init__(hue, threshold)
+
+    def __call__(self, data: pd.DataFrame) -> pd.Series:
+        return data[self.hue] == self.threshold
+
+    def __repr__(self):
+        return f"{self.hue} == {self.threshold}"
+
+
+class ConditionGtQuantile(Condition):
+    def __init__(self, hue: str, quantile: float):
+        super().__init__(hue, quantile)
+
+    def __call__(self, data: pd.DataFrame) -> pd.Series:
+        return data[self.hue] > data[self.hue].quantile(self.threshold)
+
+    def __repr__(self):
+        return f"{self.hue} > {self.threshold} quantile"
+
+
+class ConditionLtQuantile(Condition):
+    def __init__(self, hue: str, quantile: float):
+        super().__init__(hue, quantile)
+
+    def __call__(self, data: pd.DataFrame) -> pd.Series:
+        return data[self.hue] < data[self.hue].quantile(self.threshold)
+
+    def __repr__(self):
+        return f"{self.hue} < {self.threshold} quantile"
