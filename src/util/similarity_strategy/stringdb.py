@@ -58,3 +58,7 @@ class DirectStringScore(ProteinSimilarityStrategy):
 
     def __repr__(self) -> str:
         return f"stringdb_{self.metrics}"
+
+    @property
+    def lower_better(self) -> bool:
+        return False

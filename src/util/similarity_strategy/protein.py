@@ -46,6 +46,10 @@ class MSA(ProteinSimilarityStrategy):
     def __repr__(self) -> str:
         return "MSA"
 
+    @property
+    def lower_better(self) -> bool:
+        return False
+
 
 class BlastP(ProteinSimilarityStrategy):
     FASTAFILE = "/mnt/H/MYWORK/eCLIP_ENCODE/data/uniprot/reviewed.fasta"
@@ -119,6 +123,10 @@ class BlastP(ProteinSimilarityStrategy):
     def __repr__(self) -> str:
         return "Blastp"
 
+    @property
+    def lower_better(self) -> bool:
+        return False
+
 
 class TAPE(ProteinSimilarityStrategy):
     def _protein_similarity(self) -> pd.DataFrame:
@@ -146,6 +154,10 @@ class TAPE(ProteinSimilarityStrategy):
 
     def __repr__(self) -> str:
         return "TAPE"
+
+    @property
+    def lower_better(self) -> bool:
+        return True
 
 
 class KeywordCosine(ProteinSimilarityStrategy):
@@ -175,3 +187,7 @@ class KeywordCosine(ProteinSimilarityStrategy):
 
     def __repr__(self) -> str:
         return "KeywordCosine"
+
+    @property
+    def lower_better(self) -> bool:
+        return True
