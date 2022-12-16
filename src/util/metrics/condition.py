@@ -1,6 +1,6 @@
 from abc import ABC
 import pandas as pd
-from typing import List
+from typing import List, Union
 
 
 class Condition(ABC):
@@ -62,7 +62,7 @@ class ConditionNeq(Condition):
 
 
 class ConditionEq(Condition):
-    def __init__(self, hue: str, threshold: float):
+    def __init__(self, hue: str, threshold: Union[float, str]):
         super().__init__(hue, threshold)
 
     def __call__(self, data: pd.DataFrame) -> pd.Series:
