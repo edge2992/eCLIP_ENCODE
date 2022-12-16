@@ -14,7 +14,7 @@ def test_prepare_keywords_dict(sample_metrics):
 
 
 def test_contigency_table(HepG2_1e3_metrics):
-    from src.util.metrics.keyword import KeywordConfidence, ConditionGt
+    from src.util.metrics import KeywordConfidence, ConditionGt
     import numpy as np
 
     confidence = KeywordConfidence(HepG2_1e3_metrics)
@@ -26,7 +26,7 @@ def test_contigency_table(HepG2_1e3_metrics):
 
 
 def test_keyword_confidence(HepG2_1e3_metrics):
-    from src.util.metrics.keyword import KeywordConfidence, ConditionGt
+    from src.util.metrics import KeywordConfidence, ConditionGt
 
     confidence = KeywordConfidence(HepG2_1e3_metrics)
     oddsratio, p_value = confidence.keyword_confidence(

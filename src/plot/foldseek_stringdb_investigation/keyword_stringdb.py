@@ -102,7 +102,7 @@ from tqdm import tqdm
 
 condition = ConditionGt("stringdb_score", 0.5)
 dd = []
-for key in tqdm(keyword_confidence.keywords):
+for key in tqdm(keyword_confidence.keywords()):
     ratio, p = keyword_confidence.keyword_confidence(key, condition)
     dd.append(
         {

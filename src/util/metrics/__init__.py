@@ -1,10 +1,6 @@
-from src.util.metrics.keyword import (
-    Condition,
-    ConditionAnd,
-    ConditionGt,
-    ConditionLt,
-    KeywordConfidence,
-)
+from src.util.metrics.condition import Condition, ConditionAnd, ConditionGt, ConditionLt
+from src.util.metrics.keyword import KeywordConfidence
+
 from .metrics import Metrics
 
 __all__ = [

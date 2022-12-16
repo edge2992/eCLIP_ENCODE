@@ -1,6 +1,6 @@
 # ある条件で実験ペアを抽出した時にキーワードがエンリッチメントされる度合いをフィッシャーの正確検定で測る
 import os
-from typing import Dict, List, Union
+from typing import Dict, Union
 
 import pandas as pd
 import scipy.stats as st
@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from tqdm import tqdm
 
 from src.eclip import Compare, Dataset
+from src.util.metrics.condition import Condition
 
 load_dotenv()
 
@@ -17,50 +18,6 @@ CACHE_DIR = os.path.join(PROJECT_PATH, ".cache")
 
 if not os.path.exists(CACHE_DIR):
     os.mkdir(CACHE_DIR)
-
-
-class Condition:
-    def __init__(self, hue, threshold):
-        self.hue = hue
-        self.threshold = threshold
-
-    def __call__(self, row):
-        raise NotImplementedError()
-
-
-class ConditionGt(Condition):
-    def __init__(self, hue: str, threshold: float):
-        super().__init__(hue, threshold)
-
-    def __call__(self, data: pd.DataFrame) -> pd.Series:
-        return data[self.hue] > self.threshold
-
-    def __repr__(self):
-        return f"{self.hue} > {self.threshold}"
-
-
-class ConditionLt(Condition):
-    def __init__(self, hue: str, threshold: float):
-        super().__init__(hue, threshold)
-
-    def __call__(self, data: pd.DataFrame) -> pd.Series:
-        return data[self.hue] < self.threshold
-
-    def __repr__(self):
-        return f"{self.hue} < {self.threshold}"
-
-
-class ConditionAnd(Condition):
-    def __init__(self, conditions: List[Condition]):
-        self.conditions = conditions
-
-    def __call__(self, data: pd.DataFrame) -> pd.Series:
-        return pd.concat(
-            [condition(data) for condition in self.conditions], axis=1
-        ).all(axis=1)
-
-    def __repr__(self):
-        return f"{' and '.join([str(condition) for condition in self.conditions])}"
 
 
 class KeywordConfidence:
