@@ -8,6 +8,9 @@ class Condition(ABC):
         self.hue = hue
         self.threshold = threshold
 
+    def set_threshold(self, threshold):
+        self.threshold = threshold
+
     def __call__(self, row):
         raise NotImplementedError()
 
@@ -80,7 +83,7 @@ class ConditionGtQuantile(Condition):
         return data[self.hue] > data[self.hue].quantile(self.threshold)
 
     def __repr__(self):
-        return f"{self.hue} > {self.threshold} quantile"
+        return f"{self.hue} > {self.threshold:.2f} quantile"
 
 
 class ConditionLtQuantile(Condition):
@@ -91,4 +94,4 @@ class ConditionLtQuantile(Condition):
         return data[self.hue] < data[self.hue].quantile(self.threshold)
 
     def __repr__(self):
-        return f"{self.hue} < {self.threshold} quantile"
+        return f"{self.hue} < {self.threshold:.2f} quantile"

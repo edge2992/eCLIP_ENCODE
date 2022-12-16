@@ -1,3 +1,4 @@
+import pandas as pd
 from src.util.metrics.condition import Condition
 from src.util.bedfile import load_replicateIDR_report
 
@@ -7,9 +8,11 @@ class SampleSetECLIP:
         self.condition = condition
         self.__reprot = self.__load(self.condition)
 
-    def __load(self, condition: Condition):
+    def __load(self, condition: Condition) -> pd.DataFrame:
         report = load_replicateIDR_report()
-        return report[condition(report)]
+        result = report[condition(report)]
+        assert isinstance(result, pd.DataFrame)
+        return result
 
     @property
     def report(self):
