@@ -36,6 +36,9 @@ class Lift(InteractionSimilarityStrategy):
             dtype=float,
         )
 
+    def __repr__(self) -> str:
+        return "Lift"
+
 
 class Dice(InteractionSimilarityStrategy):
     def execute(self) -> pd.DataFrame:
@@ -54,6 +57,9 @@ class Dice(InteractionSimilarityStrategy):
             dtype=float,
         )
 
+    def __repr__(self) -> str:
+        return "Dice"
+
 
 class Jaccard(InteractionSimilarityStrategy):
     def execute(self) -> pd.DataFrame:
@@ -68,6 +74,9 @@ class Jaccard(InteractionSimilarityStrategy):
             columns=self.interaction_intersection.columns,
             dtype=float,
         )
+
+    def __repr__(self) -> str:
+        return "Jaccard"
 
 
 class Simpson(InteractionSimilarityStrategy):
@@ -85,6 +94,9 @@ class Simpson(InteractionSimilarityStrategy):
             dtype=float,
         )
 
+    def __repr__(self) -> str:
+        return "Simpson"
+
 
 class Cosine(InteractionSimilarityStrategy):
     def execute(self) -> pd.DataFrame:
@@ -100,3 +112,6 @@ class Cosine(InteractionSimilarityStrategy):
             columns=self.interaction_intersection.columns,
             dtype=float,
         )
+
+    def __repr__(self) -> str:
+        return "Cosine"

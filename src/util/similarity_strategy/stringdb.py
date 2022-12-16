@@ -19,7 +19,7 @@ class DirectStringScore(ProteinSimilarityStrategy):
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
         symmetric: bool = False,
-        symmetric_method: str = "average",
+        symmetric_method: str = "avg",
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
         metrics: str = "score",
     ):
@@ -55,3 +55,6 @@ class DirectStringScore(ProteinSimilarityStrategy):
 
     def _idmapping(self):
         return {v: k for k, v in ENCODEprotein2preferredName().items()}
+
+    def __repr__(self) -> str:
+        return f"stringdb_{self.metrics}"

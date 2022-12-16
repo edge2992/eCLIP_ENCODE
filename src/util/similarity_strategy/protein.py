@@ -43,6 +43,9 @@ class MSA(ProteinSimilarityStrategy):
         """Clustal Omegaを実行してファイルをpathに保存する"""
         raise NotImplementedError()
 
+    def __repr__(self) -> str:
+        return "MSA"
+
 
 class BlastP(ProteinSimilarityStrategy):
     FASTAFILE = "/mnt/H/MYWORK/eCLIP_ENCODE/data/uniprot/reviewed.fasta"
@@ -113,6 +116,9 @@ class BlastP(ProteinSimilarityStrategy):
         print(cmd_makeblastdb)
         return subprocess.Popen(cmd_makeblastdb, shell=True)
 
+    def __repr__(self) -> str:
+        return "Blastp"
+
 
 class TAPE(ProteinSimilarityStrategy):
     def _protein_similarity(self) -> pd.DataFrame:
@@ -137,6 +143,9 @@ class TAPE(ProteinSimilarityStrategy):
     def _execute_tape(self, path: str):
         """TAPEを実行してファイルをpathに保存する"""
         raise NotImplementedError()
+
+    def __repr__(self) -> str:
+        return "TAPE"
 
 
 class KeywordCosine(ProteinSimilarityStrategy):
@@ -163,3 +172,6 @@ class KeywordCosine(ProteinSimilarityStrategy):
             index=keywords["label"].tolist(),
             columns=keywords["label"].tolist(),
         )
+
+    def __repr__(self) -> str:
+        return "KeywordCosine"

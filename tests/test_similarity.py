@@ -151,7 +151,7 @@ def test_dice_protein():
         for col, value in row.items():
             gene1 = get_gene_list(report, str(index))
             gene2 = get_gene_list(report, str(col))
-            expected = len(set(gene1) & set(gene2)) * 2 / (len(gene1) + len(gene2))
+            expected = len(set(gene1) & set(gene2)) * 2 / (len(gene1) + len(gene2))  # type: ignore
             assert np.isclose(value, expected, atol=1e-9), f"{index}, {col} invalid"
 
 

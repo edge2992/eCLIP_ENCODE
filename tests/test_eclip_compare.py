@@ -8,9 +8,10 @@ def test_compare():
     assert len(dataset2.genes) == 1590
     assert len(compare.keyword_intersection) == 6
     assert len(compare.gene_intersection) == 215
+    print(compare)
     assert (
         str(compare)
-        == "/experiments/ENCSR384MWO/ (CSTF2, HepG2) & /experiments/ENCSR406OOZ/ (SUB1, HepG2)"
+        == "/experiments/ENCSR384MWO/ (CSTF2, HepG2)_/experiments/ENCSR406OOZ/ (SUB1, HepG2)"
     )
     # dataset1: /experiments/ENCSR384MWO/
     # dataset2: /experiments/ENCSR406OOZ/

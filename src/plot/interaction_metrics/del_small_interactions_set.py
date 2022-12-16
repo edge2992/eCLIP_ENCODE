@@ -2,15 +2,23 @@
 # 優先度高い
 
 # %%
+import pandas as pd
 import os
 import seaborn as sns
 from dotenv import load_dotenv
 
 from src.plot.interaction_metrics.representative import (
-    similarity_strategy_dict,
     target_report,
-    metrics,
     describe_dataset_pair,
+)
+from src.util.metrics import Metrics
+from src.util.similarity_strategy import (
+    TAPE,
+    KeywordCosine,
+    BlastP,
+    Simpson,
+    Lift,
+    Cosine,
 )
 
 load_dotenv()
@@ -28,7 +36,16 @@ if not os.path.exists(SAVEDIR):
 
 
 report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
-data = metrics(report, *similarity_strategy_dict())
+data: pd.DataFrame = Metrics(report)(
+    [
+        TAPE(),
+        KeywordCosine(),
+        BlastP(symmetric=True, symmetric_method="avg"),
+        Simpson(),
+        Lift(),
+        Cosine(),
+    ]
+)  # type: ignore
 # %%
 tape_data = data.sort_values("TAPE").reset_index(drop=True)
 tape_data["label"] = [
@@ -38,7 +55,7 @@ tape_data["label"] = [
 splot = sns.pairplot(
     tape_data,
     hue="label",
-    vars=["TAPE", "keyword", "blastp", "simpson"],
+    vars=["TAPE", "KeywordCosine", "Blastp", "Simpson"],
     corner=True,
     palette={
         "TOP{}".format(TOPN): sns.color_palette()[1],  # type: ignore
@@ -56,7 +73,7 @@ splot.fig.savefig(
 
 # %%
 
-simpson_data = data.sort_values("simpson", ascending=False).reset_index(drop=True)
+simpson_data = data.sort_values("Simpson", ascending=False).reset_index(drop=True)
 simpson_data["label"] = [
     "TOP{}".format(TOPN) if i else "others" for i in data.index < TOPN
 ]
@@ -64,7 +81,7 @@ simpson_data["label"] = [
 splot = sns.pairplot(
     simpson_data,
     hue="label",
-    vars=["TAPE", "keyword", "blastp", "simpson"],
+    vars=["TAPE", "KeywordCosine", "Blastp", "Simpson"],
     corner=True,
     palette={
         "TOP{}".format(TOPN): sns.color_palette()[1],  # type: ignore

@@ -5,6 +5,7 @@ from src.util.similarity_strategy import (
     ProteinSimilarityStrategy,
     SimilarityStrategy,
 )
+from typing import Union
 import numpy as np
 import pandas as pd
 
@@ -12,11 +13,16 @@ import pandas as pd
 class Similarity(ABC):
     strategy: SimilarityStrategy = Default()
 
-    def setStrategy(self, strategy: SimilarityStrategy):
+    def setStrategy(
+        self, strategy: SimilarityStrategy, report: Union[None, pd.DataFrame] = None
+    ):
         if strategy is not None:
             self.strategy = strategy
         else:
             self.strategy = Default()
+
+        if report is not None:
+            self.strategy.set_report(report)
 
     def executeStrategy(self):
         return self.strategy.execute()
