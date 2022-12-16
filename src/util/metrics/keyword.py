@@ -1,10 +1,11 @@
 # ある条件で実験ペアを抽出した時にキーワードがエンリッチメントされる度合いをフィッシャーの正確検定で測る
 import os
-from typing import Dict
+from typing import Dict, List, Union
 
 import pandas as pd
 import scipy.stats as st
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 from src.eclip import Compare, Dataset
 
@@ -49,6 +50,19 @@ class ConditionLt(Condition):
         return f"{self.hue} < {self.threshold}"
 
 
+class ConditionAnd(Condition):
+    def __init__(self, conditions: List[Condition]):
+        self.conditions = conditions
+
+    def __call__(self, data: pd.DataFrame) -> pd.Series:
+        return pd.concat(
+            [condition(data) for condition in self.conditions], axis=1
+        ).all(axis=1)
+
+    def __repr__(self):
+        return f"{' and '.join([str(condition) for condition in self.conditions])}"
+
+
 class KeywordConfidence:
     def __init__(
         self,
@@ -57,8 +71,8 @@ class KeywordConfidence:
     ):
         self.report = report
         self.label_keyword_report_path = label_keyword_report_path
-        self.__keyword_report: pd.DataFrame
-        self.__keyword_dict: Dict
+        self._keyword_report: pd.DataFrame
+        self._keyword_dict: Dict
 
     def keyword_confidence(
         self, keyword: str, condition: Condition, alternatives: str = "greater"
@@ -71,36 +85,40 @@ class KeywordConfidence:
         targets = self.report[condition(self.report)]
         assert isinstance(targets, pd.DataFrame)
         target_labels = self.labels(targets)
-        data = pd.DataFrame(
-            {
-                str(condition): self.keyword_report["label"].isin(target_labels),  # type: ignore
-                keyword: self.keyword_report["keyword"] == keyword,
-            }
-        )
-        return (
-            pd.crosstab(data[str(condition)], data[keyword])
-            .sort_index(axis=0, ascending=False)
-            .sort_index(axis=1, ascending=False)
-        )
+        intersection = set(target_labels) & set(self.keywords_dict[keyword])
+        x = len(intersection)
+        n = len(target_labels)
+        N = len(self.keywords_dict[keyword])
+        M = self.report.shape[0]
+        return pd.DataFrame([[x, n - x], [N - x, M - n - N + x]])
 
     @property
     def keywords_dict(self) -> Dict:
         # keyword -> List[label of pair]のDictを返す
-        if not hasattr(self, "__keyword_dict"):
-            self.__keyword_dict = dict(
+        if not hasattr(self, "_keyword_dict"):
+            self._keyword_dict = dict(
                 self.keyword_report.groupby("keyword")["label"].apply(list)
             )
-        return self.__keyword_dict
+        return self._keyword_dict
 
     @property
     def keyword_report(self) -> pd.DataFrame:
-        if not hasattr(self, "__keyword_report"):
-            self.__keyword_report = self.__load_label_keyword_report()
-        return self.__keyword_report
+        if not hasattr(self, "_keyword_report"):
+            self._keyword_report = self.__load_label_keyword_report()
+        return self._keyword_report
 
-    @property
-    def keywords(self):
-        return self.keyword_report["keyword"].unique().tolist()
+    def keywords(self, condition: Union[Condition, None] = None):
+        k_report: pd.DataFrame
+        if condition is not None:
+            target_report = self.report[condition(self.report)]
+            assert isinstance(target_report, pd.DataFrame)
+            targets = self.labels(target_report)
+            k_report = self.keyword_report[
+                self.keyword_report.loc[:, "label"].isin(targets)
+            ]
+        else:
+            k_report = self.keyword_report
+        return k_report.loc[:, "keyword"].unique().tolist()
 
     def __load_label_keyword_report(self):
         if not os.path.exists(self.label_keyword_report_path):
@@ -148,6 +166,16 @@ class KeywordConfidence:
 
         query = str(self.report.iloc[:, 0].to_list())
         return hashlib.md5(query.encode()).hexdigest()
+
+
+def dataframe_fisher_exact(condition: Condition, data: pd.DataFrame):
+    """conditionを満たすデータの、keywordごとのfisher_exactの結果を返す"""
+    confidence = KeywordConfidence(data)
+    keyword_fisher_exact = {}
+    for keyword in tqdm(confidence.keywords(condition)):
+        odd_ratio, p_value = confidence.keyword_confidence(keyword, condition)
+        keyword_fisher_exact[keyword] = {"odd_ratio": odd_ratio, "p_value": p_value}
+    return pd.DataFrame(keyword_fisher_exact).T.sort_values("p_value")
 
 
 if __name__ == "__main__":

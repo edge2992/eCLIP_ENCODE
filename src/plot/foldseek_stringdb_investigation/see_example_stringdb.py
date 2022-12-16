@@ -1,4 +1,5 @@
 # stringdbを使って、jaccardとsimpsonの相互作用スコアが高いものを確認する
+# Jaccardスコアが高い、低いの定義を作ってケースごとに可視化する
 
 # %%
 import os
@@ -7,15 +8,16 @@ import pandas as pd
 import seaborn as sns
 from dotenv import load_dotenv
 
-from src.util.metrics import Metrics
 from src.plot.interaction_metrics.representative import target_report
-from src.util.similarity_strategy import (
-    DirectStringScore,
-    Jaccard,
-    Simpson,
+from src.util.metrics import (
+    Condition,
+    ConditionAnd,
+    ConditionGt,
+    ConditionLt,
+    Metrics,
 )
-from src.plot.interaction_metrics.representative import describe_dataset_pair
-
+from src.util.similarity_strategy import DirectStringScore, Jaccard, Simpson
+from src.util.metrics.keyword import dataframe_fisher_exact
 
 sns.set(font_scale=1.4)
 
@@ -51,66 +53,45 @@ data: pd.DataFrame = Metrics(report)(
     ]
 )  # type: ignore
 
-# %%
-nonzero_data = data[data["stringdb_score"] != 0].copy()
-nonzero_data.describe()
-
-# %%
-data[["simpson", "jaccard"]].describe()
-
-HIGH_JACCARD_THRESHOLD = 0.2
-LOW_JACCARD_THRESHOLD = 0.1
-HIGH_STRING_DB_THRESHOLD = 0.9
-LOW_STRING_DB_THRESHOLD = 0.1
-LABELS = ["Target label_1", "Target label_2", "stringdb_score", "jaccard", "simpson"]
-
-
 # Jaccardスコアが高い、低いの定義を作ってケースごとに可視化する
-
-# Case 1: stringdb_scoreが高くて、jaccardスコアが高いものの特徴はどうなっているか
 # %%
-high_stringdb_high_jaccard = (
-    nonzero_data[nonzero_data["stringdb_score"] > HIGH_STRING_DB_THRESHOLD]
-    .sort_values("jaccard", ascending=False)
-    .head(10)
-)
-print(high_stringdb_high_jaccard[LABELS])
-for index, row in high_stringdb_high_jaccard.iterrows():
-    describe_dataset_pair(row)
-# Spliceosome関連っぽい
 
+FILEPREFIX = f"{BIOSAMPLE}_threshold_gene_num_{THRESHOLD_GENE_NUM}"
+
+
+def save_fisher_exact_test(condition: Condition, data: pd.DataFrame):
+    sample = dataframe_fisher_exact(condition, data)
+    sample.to_csv(
+        os.path.join(
+            SAVEDIR,
+            FILEPREFIX + str(condition).replace(" ", "_") + ".csv",
+        ),
+    )
+    return sample
+
+
+# %%
+# HIGH_JACCARD_THRESHOLD = 0.2
+# LOW_JACCARD_THRESHOLD = 0.1
+# HIGH_STRING_DB_THRESHOLD = 0.9
+# LOW_STRING_DB_THRESHOLD = 0.1
+high_stringdb_score = ConditionGt("stringdb_score", 0.9)
+high_jaccard = ConditionGt("Jaccard", 0.2)
+low_stringdb_score = ConditionLt("stringdb_score", 0.1)
+low_jaccard = ConditionLt("Jaccard", 0.1)
+
+# %%
+# Case 1: stringdb_scoreが高くて、jaccardスコアが高いものの特徴はどうなっているか
+save_fisher_exact_test(ConditionAnd([high_stringdb_score, high_jaccard]), data)
 # %%
 # Case 2: stringdb_scoreが高くて、jaccardスコアが低いものの特徴はどうなっているか
-
-high_stringdb_low_jaccard = (
-    nonzero_data[nonzero_data["stringdb_score"] > HIGH_STRING_DB_THRESHOLD]
-    .sort_values("jaccard", ascending=True)
-    .head(10)
-)
-print(high_stringdb_low_jaccard[LABELS])
-for index, row in high_stringdb_low_jaccard.iterrows():
-    describe_dataset_pair(row)
-
+save_fisher_exact_test(ConditionAnd([high_stringdb_score, low_jaccard]), data)
 # %%
-
 # Case 3: stringdb_scoreが低くてJaccardスコアが高いものの特徴はどうなっっているか
-
-low_stringdb_high_jaccard = (
-    nonzero_data[nonzero_data["stringdb_score"] < 0.2]
-    .sort_values("jaccard", ascending=False)
-    .head(10)
-)
-print(low_stringdb_high_jaccard.shape)
-print(low_stringdb_high_jaccard[LABELS])
-for index, row in low_stringdb_high_jaccard.iterrows():
-    describe_dataset_pair(row)
+save_fisher_exact_test(ConditionAnd([low_stringdb_score, high_jaccard]), data)
 
 # %%
-
 # Case 4: stringdb_scoreが低くてJaccardスコアが低いものの特徴はどうなっているか
-
-# Case 5: stringdb_scoreがないものはどうなっているか
-nonzero_data[["simpson", "jaccard"]].describe()
-
+save_fisher_exact_test(ConditionAnd([low_stringdb_score, low_jaccard]), data)
 
 # %%

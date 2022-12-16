@@ -15,6 +15,7 @@ from src.plot.interaction_metrics.representative import (
 )
 from src.util.metrics import Metrics, KeywordConfidence, ConditionGt
 from src.util.similarity_strategy import TAPE, DirectStringScore, Jaccard, Simpson
+from typing import List
 
 sns.set(font_scale=1.4)
 
@@ -53,16 +54,6 @@ data: pd.DataFrame = Metrics(report)(
 keyword_confidence = KeywordConfidence(data)
 keyword_experiment_pair = keyword_confidence.keywords_dict
 # %%
-from src.eclip import Dataset, Compare
-
-for index, row in data.iterrows():
-    print(Compare([Dataset(row["Dataset_1"]), Dataset(row["Dataset_2"])]).label)
-    break
-
-# %%
-
-
-from typing import List
 
 
 def plotting_data(data: pd.DataFrame, keyword_experiment_pair, metrics: List):

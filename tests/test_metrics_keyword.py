@@ -19,11 +19,10 @@ def test_contigency_table(HepG2_1e3_metrics):
 
     confidence = KeywordConfidence(HepG2_1e3_metrics)
     crosstab = confidence.cross_tab("Acetylation", ConditionGt("Jaccard", 0.3))
-    assert (crosstab.values == np.array([[25, 473], [410, 7083]])).all()
-    # Acetylation    True   False
-    # Jaccard > 0.3
-    # True              25    473
-    # False            410   7083
+    assert (crosstab.values == np.array([[25, 45], [410, 601]])).all()
+    #      0    1
+    # 0   25   45
+    # 1  410  601
 
 
 def test_keyword_confidence(HepG2_1e3_metrics):
