@@ -3,3 +3,4 @@ from .protein import *
 from .interaction import *
 from .stringdb import *
 from .foldseek import *
+from .peak import *

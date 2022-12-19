@@ -72,7 +72,7 @@ def jaccard_bed_all(
             print("{} Done".format(key))
 
 
-def covert_df_from_jaccard_output(
+def convert_df_from_jaccard_output(
     report_dir: str, metrics: str = "jaccard"
 ) -> pd.DataFrame:
     def load_jaccard_output(path: str) -> pd.Series:
@@ -134,7 +134,7 @@ def main():
         os.makedirs(JACCARD_DIR)
 
     jaccard_bed_all(sorted_bedfiles, JACCARD_DIR)
-    data = covert_df_from_jaccard_output(JACCARD_DIR)
+    data = convert_df_from_jaccard_output(JACCARD_DIR)
     print(data.head())
 
 
