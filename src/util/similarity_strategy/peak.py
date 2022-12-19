@@ -38,6 +38,9 @@ class PeakStrategy(SimilarityStrategy):
             index=mapping_dict, columns=mapping_dict
         )
 
+    def __repr__(self) -> str:
+        return f"peak {self.metrics}"
+
     def _idmapping(self):
         df = pd.DataFrame(
             {

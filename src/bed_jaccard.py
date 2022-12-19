@@ -84,7 +84,7 @@ def convert_df_from_jaccard_output(
         "intersection",
         "union-intersection",
         "jaccard",
-        "n-intersections",
+        "n_intersections",
     ]:
         raise ValueError(
             "metrics must be in [intersection, union-intersection, jaccard, n-intersections]"
