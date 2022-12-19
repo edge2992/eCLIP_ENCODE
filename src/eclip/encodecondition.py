@@ -34,6 +34,17 @@ class GeneNumberGteCondition(GeneNumberCondition):
         return f"Gene Number over {self.threshold}"
 
 
+class ProteinKeywordCondition(ENCODECondition):
+    def __init__(self, keyword: str):
+        super().__init__("keyword", keyword)
+
+    def __call__(self, data: pd.DataFrame) -> pd.Series:
+        return data.apply(lambda row: self.threshold in Dataset(row).keywords, axis=1)
+
+    def __repr__(self) -> str:
+        return f"Protein Keyword {self.threshold}"
+
+
 ECLIP_SAMPLESETS = [
     ConditionAnd(
         [ConditionEq("Biosample name", "HepG2"), GeneNumberGteCondition(1000)]
