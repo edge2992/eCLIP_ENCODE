@@ -4,6 +4,7 @@ from src.util.similarity_strategy import (
     InteractionSimilarityStrategy,
     ProteinSimilarityStrategy,
     SimilarityStrategy,
+    PeakStrategy,
 )
 from typing import Union
 import numpy as np
@@ -38,6 +39,10 @@ class Similarity(ABC):
 
 class InteractionSimilarity(Similarity):
     strategy: InteractionSimilarityStrategy
+
+
+class PeakSimilarity(Similarity):
+    strategy: PeakStrategy
 
 
 class ProteinSimilarity(Similarity):

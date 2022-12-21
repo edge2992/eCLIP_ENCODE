@@ -3,8 +3,13 @@ from src.util.similarity_strategy import (
     SimilarityStrategy,
     ProteinSimilarityStrategy,
     InteractionSimilarityStrategy,
+    PeakStrategy,
 )
-from src.util.similarity_protein import ProteinSimilarity, InteractionSimilarity
+from src.util.similarity_protein import (
+    ProteinSimilarity,
+    InteractionSimilarity,
+    PeakSimilarity,
+)
 import pandas as pd
 from typing import Union, List
 
@@ -31,14 +36,18 @@ class Metrics:
             return pd.concat([self.description(report_columns), data], axis=1)
         else:
             return data
-    
+
     def __similarity(self, strategy: SimilarityStrategy):
         if isinstance(strategy, ProteinSimilarityStrategy):
             data = self.__protein_similarity(strategy)
         elif isinstance(strategy, InteractionSimilarityStrategy):
             data = self.__interaction_similarity(strategy)
+        elif isinstance(strategy, PeakStrategy):
+            data = self.__peak_similarity(strategy)
         else:
-            raise ValueError("strategy must be ProteinSimilarityStrategy or InteractionSimilarityStrategy")
+            raise ValueError(
+                "strategy must be ProteinSimilarityStrategy or InteractionSimilarityStrategy"
+            )
         return pd.Series(data, name=str(strategy))
 
     def __protein_similarity(self, strategy: ProteinSimilarityStrategy):
@@ -47,6 +56,11 @@ class Metrics:
         return handler.flatten_tri(
             handler.executeStrategy(transform=True), include_diagonal=False
         )
+
+    def __peak_similarity(self, strategy: PeakStrategy):
+        handler = PeakSimilarity()
+        handler.setStrategy(strategy, self.report)
+        return handler.flatten_tri(handler.executeStrategy(), include_diagonal=False)
 
     def __interaction_similarity(self, strategy: InteractionSimilarityStrategy):
         handler = InteractionSimilarity()

@@ -38,3 +38,12 @@ def test_metrics_multiple():
     for index, row in data.iterrows():
         assert row["TAPE"] == expected_tape.loc[index, "TAPE"]  # type: ignore
         assert row["Dice"] == expected_dice.loc[index, "Dice"]  # type: ignore
+
+
+def test_metrics_peak(sample_report):
+    from src.util.metrics.metrics import Metrics
+    from src.util.similarity_strategy import PeakStrategy
+
+    metrics = Metrics(sample_report)
+    data_peak = metrics(PeakStrategy(), add_description=True)
+    print(data_peak)

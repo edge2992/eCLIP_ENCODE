@@ -69,3 +69,7 @@ class FoldSeekTMScore(ProteinSimilarityStrategy):
 
     def __repr__(self) -> str:
         return f"foldseek_tmscore_{self.symmetric_method}"
+
+    @property
+    def lower_better(self) -> bool:
+        return False

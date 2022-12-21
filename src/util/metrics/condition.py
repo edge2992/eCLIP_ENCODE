@@ -1,11 +1,14 @@
 from abc import ABC
 import pandas as pd
-from typing import List
+from typing import List, Union
 
 
 class Condition(ABC):
     def __init__(self, hue, threshold):
         self.hue = hue
+        self.threshold = threshold
+
+    def set_threshold(self, threshold):
         self.threshold = threshold
 
     def __call__(self, row):
@@ -62,7 +65,7 @@ class ConditionNeq(Condition):
 
 
 class ConditionEq(Condition):
-    def __init__(self, hue: str, threshold: float):
+    def __init__(self, hue: str, threshold: Union[float, str]):
         super().__init__(hue, threshold)
 
     def __call__(self, data: pd.DataFrame) -> pd.Series:
@@ -80,7 +83,7 @@ class ConditionGtQuantile(Condition):
         return data[self.hue] > data[self.hue].quantile(self.threshold)
 
     def __repr__(self):
-        return f"{self.hue} > {self.threshold} quantile"
+        return f"{self.hue} > {self.threshold:.2f} quantile"
 
 
 class ConditionLtQuantile(Condition):
@@ -91,4 +94,4 @@ class ConditionLtQuantile(Condition):
         return data[self.hue] < data[self.hue].quantile(self.threshold)
 
     def __repr__(self):
-        return f"{self.hue} < {self.threshold} quantile"
+        return f"{self.hue} < {self.threshold:.2f} quantile"

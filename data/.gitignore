@@ -2,5 +2,6 @@ eCLIP
 *.pim
 uniprot
 afdb
+bed
 stringdb
 label_keyword_report.csv

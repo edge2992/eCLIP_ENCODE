@@ -80,9 +80,17 @@ high_jaccard = ConditionGt("Jaccard", 0.2)
 low_stringdb_score = ConditionLt("stringdb_score", 0.1)
 low_jaccard = ConditionLt("Jaccard", 0.1)
 
+#
+for condition in [
+    ConditionAnd([high_stringdb_score, high_jaccard]),
+    ConditionAnd([high_stringdb_score, low_jaccard]),
+    ConditionAnd([low_stringdb_score, high_jaccard]),
+    ConditionAnd([low_stringdb_score, low_jaccard]),
+]:
+    print(condition, f"#{data[condition(data)].shape[0]}")
+
 # %%
 # Case 1: stringdb_scoreが高くて、jaccardスコアが高いものの特徴はどうなっているか
-save_fisher_exact_test(ConditionAnd([high_stringdb_score, high_jaccard]), data)
 # %%
 # Case 2: stringdb_scoreが高くて、jaccardスコアが低いものの特徴はどうなっているか
 save_fisher_exact_test(ConditionAnd([high_stringdb_score, low_jaccard]), data)

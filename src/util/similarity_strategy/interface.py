@@ -36,6 +36,10 @@ class SimilarityStrategy(ABC):
     def execute(self) -> pd.DataFrame:
         raise NotImplementedError()
 
+    @property
+    def lower_better(self) -> bool:
+        raise NotImplementedError()
+
 
 class ProteinSimilarityStrategy(SimilarityStrategy):
 
@@ -221,6 +225,10 @@ class InteractionSimilarityStrategy(SimilarityStrategy):
         if self._nunique_gene is None:
             self._nunique_gene = len(set(chain(*self.accession_genes.values())))
         return self._nunique_gene
+
+    @property
+    def lower_better(self) -> bool:
+        return False
 
 
 class Default(SimilarityStrategy):
