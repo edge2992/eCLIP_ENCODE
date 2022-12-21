@@ -18,6 +18,7 @@ python-dotenv = "*"
 torch = "*"
 tape-proteins = "*"
 scikit-learn = "*"
+networkx = "*"
 
 [dev-packages]
 flake8 = "*"
