@@ -19,6 +19,7 @@ torch = "*"
 tape-proteins = "*"
 scikit-learn = "*"
 networkx = "*"
+gtfparse = "*"
 
 [dev-packages]
 flake8 = "*"

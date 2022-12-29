@@ -79,6 +79,11 @@ print(dd["Jaccard"].quantile(0.75))
 dd["Jaccard_STRONG"] = dd["Jaccard"] > dd["Jaccard"].quantile(0.75)
 
 # %%
+for group, grouped in dd.groupby("label"):
+    print(group)
+    print(grouped["Jaccard_STRONG"].value_counts())
+    print(grouped.head())
+# %%
 target_cols = dd.columns[6:-2]
 fig, axes = plt.subplots(len(target_cols), 1, figsize=(5, 5 * len(target_cols)))
 for col, ax in zip(target_cols, axes):
