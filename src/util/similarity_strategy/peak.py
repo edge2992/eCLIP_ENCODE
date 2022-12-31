@@ -39,7 +39,7 @@ class PeakStrategy(SimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return f"peak {self.metrics}"
+        return f"Peak {self.metrics.capitalize()}"
 
     def _idmapping(self):
         df = pd.DataFrame(

@@ -37,7 +37,7 @@ class Lift(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Lift"
+        return "Gene Lift"
 
 
 class Dice(InteractionSimilarityStrategy):
@@ -58,7 +58,7 @@ class Dice(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Dice"
+        return "Gene Dice"
 
 
 class Jaccard(InteractionSimilarityStrategy):
@@ -76,7 +76,7 @@ class Jaccard(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Jaccard"
+        return "Gene Jaccard"
 
 
 class Simpson(InteractionSimilarityStrategy):
@@ -95,7 +95,7 @@ class Simpson(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Simpson"
+        return "Gene Simpson"
 
 
 class Cosine(InteractionSimilarityStrategy):
@@ -114,4 +114,4 @@ class Cosine(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Cosine"
+        return "Gene Cosine"
