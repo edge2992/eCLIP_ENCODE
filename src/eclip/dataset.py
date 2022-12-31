@@ -4,7 +4,7 @@ import pandas as pd
 
 from src.util.bed_format_strategy import FormatStrategy
 from src.util.bedfile import load_report, read_annotated_bed
-from src.util.get_bed_path import get_formatted_file_path
+from src.util.get_bed_path import get_formatted_file_path, get_file_path
 from src.eclip.uniprot.keyword import Keyword
 
 
@@ -52,6 +52,12 @@ class Dataset:
         )
         self._genes = list(set(df["gene_name"]))
         return self._genes
+
+    @property
+    def peaks_len(self):
+        peakfile = get_file_path(self._dataset)
+        with open(peakfile, "r") as f:
+            return len(f.readlines())
 
     def __repr__(self) -> str:
         return f"{self.dataset} ({self.protein}, {self.biosample})"

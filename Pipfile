@@ -26,6 +26,7 @@ flake8 = "*"
 black = "*"
 pytest = "*"
 mypy = "*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.8"
