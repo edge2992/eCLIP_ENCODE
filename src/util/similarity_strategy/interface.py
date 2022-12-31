@@ -169,6 +169,12 @@ class InteractionSimilarityStrategy(SimilarityStrategy):
     ):
         super().__init__(report, loadfile, label_method)
 
+    def drop_cache(self):
+        self._interaction_intersection = None
+        self._interaction_union = None
+        self._accession_genes = None
+        self._nunique_gene = None
+
     @property
     def accession_genes(self) -> Dict[str, List[str]]:
         # 相互作用数と遺伝子数をそれぞれ読み込む

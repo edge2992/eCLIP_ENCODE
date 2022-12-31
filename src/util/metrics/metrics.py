@@ -64,6 +64,7 @@ class Metrics:
 
     def __interaction_similarity(self, strategy: InteractionSimilarityStrategy):
         handler = InteractionSimilarity()
+        strategy.drop_cache()
         handler.setStrategy(strategy, self.report)
         return handler.flatten_tri(handler.executeStrategy(), include_diagonal=False)
 

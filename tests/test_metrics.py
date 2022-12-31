@@ -47,3 +47,15 @@ def test_metrics_peak(sample_report):
     metrics = Metrics(sample_report)
     data_peak = metrics(PeakStrategy(), add_description=True)
     print(data_peak)
+
+
+def test_metrics_peak_jaccard(K562_report):
+    from src.util.metrics.metrics import Metrics
+    from src.util.similarity_strategy import PeakStrategy, Jaccard
+
+    metrics = Metrics(K562_report)
+    data = metrics([PeakStrategy(metrics="jaccard"), Jaccard()], add_description=True)
+    expected_shape = K562_report.shape[0] * (K562_report.shape[0] - 1) / 2
+    assert data.shape[0] == expected_shape
+    assert any(data["Gene Jaccard"].isna()) == False
+    assert any(data["Peak Jaccard"].isna()) == False
