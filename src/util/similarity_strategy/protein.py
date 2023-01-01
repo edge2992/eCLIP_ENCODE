@@ -121,7 +121,7 @@ class BlastP(ProteinSimilarityStrategy):
         return subprocess.Popen(cmd_makeblastdb, shell=True)
 
     def __repr__(self) -> str:
-        return "Blastp"
+        return "BLASTP Bit"
 
     @property
     def lower_better(self) -> bool:
@@ -153,7 +153,7 @@ class TAPE(ProteinSimilarityStrategy):
         raise NotImplementedError()
 
     def __repr__(self) -> str:
-        return "TAPE"
+        return "TAPE Cosine"
 
     @property
     def lower_better(self) -> bool:

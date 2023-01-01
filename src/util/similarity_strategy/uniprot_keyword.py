@@ -32,7 +32,7 @@ class KeywordCosine(ProteinSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "KeywordCosine"
+        return "Keyword Cosine"
 
     @property
     def lower_better(self) -> bool:
@@ -78,7 +78,7 @@ class KeywordAA(ProteinSimilarityStrategy):
         return len(self._keyword2protein[keyword])
 
     def __repr__(self) -> str:
-        return "KeywordAA"
+        return "Keyword AA"
 
     @property
     def lower_better(self) -> bool:

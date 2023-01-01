@@ -57,7 +57,7 @@ class DirectStringScore(ProteinSimilarityStrategy):
         return {v: k for k, v in ENCODEprotein2preferredName().items()}
 
     def __repr__(self) -> str:
-        return f"stringdb_{self.metrics}"
+        return f"STRING {self.metrics.capitalize()}"
 
     @property
     def lower_better(self) -> bool:

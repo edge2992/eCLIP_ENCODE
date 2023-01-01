@@ -68,7 +68,7 @@ class FoldSeekTMScore(ProteinSimilarityStrategy):
         return {v: k for k, v in idmapping_mmcif().items()}
 
     def __repr__(self) -> str:
-        return f"foldseek_tmscore_{self.symmetric_method}"
+        return f"FoldSeek TM-Score_{self.symmetric_method}"
 
     @property
     def lower_better(self) -> bool:
