@@ -13,7 +13,6 @@ PROJECT_PATH = os.environ["PROJECT_PATH"]
 
 from src.util.similarity_protein import InteractionSimilarity, ProteinSimilarity
 from src.util.similarity_strategy import (
-    MSA,
     TAPE,
     Cosine,
     Dice,
@@ -22,6 +21,7 @@ from src.util.similarity_strategy import (
     Lift,
     Simpson,
 )
+from src.util.similarity_strategy.protein import MSA
 
 # %%
 similarity = InteractionSimilarity()

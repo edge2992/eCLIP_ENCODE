@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 
-from src.util.similarity_strategy import InteractionSimilarityStrategy
+from src.util.similarity_strategy.interface import InteractionSimilarityStrategy
 
 load_dotenv()
 

@@ -1,7 +1,7 @@
 from typing import Callable, Union
 import pandas as pd
 
-from src.util.similarity_strategy import ProteinSimilarityStrategy
+from src.util.similarity_strategy.interface import ProteinSimilarityStrategy
 from src.util.download.stringdb import (
     ENCODEprotein2preferredName,
     download_interaction_partners,

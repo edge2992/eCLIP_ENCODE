@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from src.util.similarity_protein import ProteinSimilarity
 from src.util.similarity_strategy import BlastP, FoldSeekTMScore
 from src.util.uniprot import load_uniprot_report
-from src.util.similarity_strategy import idmapping_mmcif
+from src.util.similarity_strategy.foldseek import idmapping_mmcif
 from foldseek.wrapper import read_aln_tmscore
 
 sns.set(font_scale=1.4)

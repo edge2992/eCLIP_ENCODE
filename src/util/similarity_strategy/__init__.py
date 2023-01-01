@@ -1,6 +1,30 @@
-from .interface import *
-from .protein import *
-from .interaction import *
-from .stringdb import *
-from .foldseek import *
-from .peak import *
+from .foldseek import FoldSeekTMScore
+from .interaction import Cosine, Dice, Jaccard, Lift, Simpson
+from .interface import (
+    InteractionSimilarityStrategy,
+    ProteinSimilarityStrategy,
+    SimilarityStrategy,
+    Default,
+)
+from .peak import PeakStrategy
+from .protein import TAPE, BlastP
+from .stringdb import DirectStringScore
+from .uniprot_keyword import KeywordCosine
+
+__all__ = [
+    "Default",
+    "SimilarityStrategy",
+    "ProteinSimilarityStrategy",
+    "InteractionSimilarityStrategy",
+    "BlastP",
+    "TAPE",
+    "FoldSeekTMScore",
+    "PeakStrategy",
+    "KeywordCosine",
+    "DirectStringScore",
+    "Jaccard",
+    "Simpson",
+    "Dice",
+    "Lift",
+    "Cosine",
+]

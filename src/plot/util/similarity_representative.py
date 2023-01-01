@@ -9,7 +9,8 @@ load_dotenv()
 PROJECT_PATH = os.environ["PROJECT_PATH"]
 
 from src.util.similarity_protein import ProteinSimilarity
-from src.util.similarity_strategy import TAPE, KeywordCosine, MSA
+from src.util.similarity_strategy import TAPE, KeywordCosine
+from src.util.similarity_strategy.protein import MSA
 from src.util.uniprot import load_keyword_report
 
 

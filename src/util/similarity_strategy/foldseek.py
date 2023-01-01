@@ -1,7 +1,7 @@
 from typing import Callable, Union
 import pandas as pd
 from foldseek.wrapper import read_aln_tmscore
-from src.util.similarity_strategy import ProteinSimilarityStrategy
+from src.util.similarity_strategy.interface import ProteinSimilarityStrategy
 import os
 from dotenv import load_dotenv
 

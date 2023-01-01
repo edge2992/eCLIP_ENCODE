@@ -1,14 +1,16 @@
 from abc import ABC
+from typing import Union
+
+import numpy as np
+import pandas as pd
+
 from src.util.similarity_strategy import (
     Default,
     InteractionSimilarityStrategy,
+    PeakStrategy,
     ProteinSimilarityStrategy,
     SimilarityStrategy,
-    PeakStrategy,
 )
-from typing import Union
-import numpy as np
-import pandas as pd
 
 
 class Similarity(ABC):
