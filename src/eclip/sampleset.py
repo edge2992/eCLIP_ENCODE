@@ -10,7 +10,7 @@ class SampleSetECLIP:
 
     def __load(self, condition: Condition) -> pd.DataFrame:
         report = load_replicateIDR_report()
-        result = report[condition(report)]
+        result = report[condition(report)]  # type: ignore
         assert isinstance(result, pd.DataFrame)
         return result
 
