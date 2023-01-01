@@ -1,6 +1,7 @@
 # %%
 import os
 
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -85,5 +86,40 @@ def plot_corr_heatmap(data, method, save=True):
 plot_corr_heatmap(data, "spearman")
 plot_corr_heatmap(data, "pearson")
 
+# %%
+
+desc = {}
+for col in data.columns[2:]:
+    desc_col = data[data[col] != 0][col].describe()
+    desc_col["nil"] = data[data[col] == 0].shape[0]
+    desc[col] = desc_col
+
+desc = pd.concat(desc, axis=1).rename({"count": "N"}, axis=0).T
+
+# %%
+desc[["N", "nil", "mean", "std", "max", "min"]].style.format(
+    {
+        "N": lambda x: f"{x:,.0f}",
+        "nil": lambda x: f"{x:,.0f}",
+        "min": lambda x: f"{x:.2f}",
+        "max": lambda x: f"{x:.2f}",
+        "mean": lambda x: f"{x:.2f}",
+        "std": lambda x: f"{x:.2f}",
+    },
+).to_latex(
+    os.path.join(TB_SAVEDIR, "protein_metrics.tex"),
+    caption=("タンパク質類似度指標の代表値", "タンパク質類似度指標の代表値."),
+    label="tab:protein_metrics",
+)
+# %%
+
+data.head()
+
+# %%
+data_dropnil = data[~(data == 0).any(axis=1)]  # type: ignore
+print(data_dropnil.shape)
+
+# %%
+data_dropnil.iloc[:, 2:].corr("spearman")  # type: ignore
 
 # %%
