@@ -37,7 +37,7 @@ def test_metrics_multiple():
     expected_dice = metrics(Dice(), add_description=True)
     for index, row in data.iterrows():
         assert row["TAPE"] == expected_tape.loc[index, "TAPE"]  # type: ignore
-        assert row["Dice"] == expected_dice.loc[index, "Dice"]  # type: ignore
+        assert row["Gene Dice"] == expected_dice.loc[index, "Gene Dice"]  # type: ignore
 
 
 def test_metrics_peak(sample_report):
