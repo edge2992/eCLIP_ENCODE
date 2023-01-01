@@ -143,7 +143,10 @@ class TAPE(ProteinSimilarityStrategy):
         embedding = load_embedding(how="avg", filepath=self.loadfile)
 
         return pd.DataFrame(
-            squareform(pdist(np.array(list(embedding.values()), dtype=float), cosine)),
+            1
+            - squareform(
+                pdist(np.array(list(embedding.values()), dtype=float), cosine)
+            ),
             index=list(embedding.keys()),
             columns=list(embedding.keys()),
         )
@@ -157,4 +160,4 @@ class TAPE(ProteinSimilarityStrategy):
 
     @property
     def lower_better(self) -> bool:
-        return True
+        return False

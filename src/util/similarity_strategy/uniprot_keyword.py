@@ -26,7 +26,7 @@ class KeywordCosine(ProteinSimilarityStrategy):
         )
         print(vectorizer.get_feature_names_out())
         return pd.DataFrame(
-            squareform(pdist(X.toarray(), cosine)),  # type: ignore
+            1 - squareform(pdist(X.toarray(), cosine)),  # type: ignore
             index=keywords["label"].tolist(),
             columns=keywords["label"].tolist(),
         )
@@ -36,7 +36,7 @@ class KeywordCosine(ProteinSimilarityStrategy):
 
     @property
     def lower_better(self) -> bool:
-        return True
+        return False
 
 
 class KeywordAA(ProteinSimilarityStrategy):
