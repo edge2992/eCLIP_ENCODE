@@ -7,6 +7,17 @@ from src.util.download.stringdb import (
     download_interaction_partners,
 )
 
+STRINGDB_SCORE_METRICS = [
+    "score",
+    "escore",
+    "dscore",
+    "nscore",
+    "fscore",
+    "pscore",
+    "ascore",
+    "tscore",
+]
+
 
 class DirectStringScore(ProteinSimilarityStrategy):
     """StringDB direct score
@@ -21,20 +32,13 @@ class DirectStringScore(ProteinSimilarityStrategy):
         symmetric: bool = False,
         symmetric_method: str = "avg",
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
+        fillna: Union[None, float] = 0,
         metrics: str = "score",
     ):
         super().__init__(report, loadfile, symmetric, symmetric_method, label_method)
-        assert metrics in [
-            "score",
-            "nscore",
-            "fscore",
-            "pscore",
-            "ascore",
-            "escore",
-            "dscore",
-            "tscore",
-        ], "invalid metrics {metrics}"
+        assert metrics in STRINGDB_SCORE_METRICS, "invalid metrics {metrics}"
         self.metrics = metrics
+        self.fillna = fillna
 
     def _load(self, required_score: int = 0) -> pd.DataFrame:
 
@@ -50,7 +54,8 @@ class DirectStringScore(ProteinSimilarityStrategy):
         assert matrix.shape[0] == matrix.shape[1]
         for i in range(matrix.shape[0]):
             matrix.iloc[i, i] = 1
-        matrix.fillna(0, inplace=True)
+        if self.fillna is not None:
+            matrix.fillna(self.fillna, inplace=True)
         return matrix
 
     def _idmapping(self):

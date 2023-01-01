@@ -108,6 +108,9 @@ desc[["N", "nil", "mean", "std", "max", "min"]].style.format(
     },
 ).to_latex(
     os.path.join(TB_SAVEDIR, "protein_metrics.tex"),
+    column_format="lrrrrrr",
+    position_float="centering",
+    hrules=True,
     caption=("タンパク質類似度指標の代表値", "タンパク質類似度指標の代表値."),
     label="tab:protein_metrics",
 )
