@@ -9,7 +9,7 @@ from .interface import (
 from .peak import PeakStrategy
 from .protein import TAPE, BlastP
 from .stringdb import DirectStringScore
-from .uniprot_keyword import KeywordCosine
+from .uniprot_keyword import KeywordCosine, KeywordAA
 
 __all__ = [
     "Default",
@@ -21,6 +21,7 @@ __all__ = [
     "FoldSeekTMScore",
     "PeakStrategy",
     "KeywordCosine",
+    "KeywordAA",
     "DirectStringScore",
     "Jaccard",
     "Simpson",

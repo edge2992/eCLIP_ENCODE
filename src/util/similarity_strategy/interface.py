@@ -137,7 +137,10 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
 
     @abstractmethod
     def _protein_similarity(self) -> pd.DataFrame:
-        # DataFrameとColumnとIndexの順番は自由
+        """
+        Colmumn, IndexがProteinのGene NameであるDataFrameを返す
+        - DataFrameとColumnとIndexの順番は自由
+        """
         raise NotImplementedError()
 
     def _idmapping(self) -> Dict[str, str]:
