@@ -139,9 +139,12 @@ pd.DataFrame(
         "HepG2": graph_metrics(edges_HepG2),
         "K562": graph_metrics(edges_K562),
     }
-).to_latex(
+).style.format("{:,d}").to_latex(
     os.path.join(TB_SAVEDIR, "graph_metrics.tex"),
     column_format="lrr",
+    position="htbp",
+    position_float="centering",
+    hrules=True,
     caption="Graph metrics for HepG2 and K562.",
     label="tab:graph_metrics",
 )

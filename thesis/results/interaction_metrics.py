@@ -114,3 +114,5 @@ plot_corr_heatmap(data_HepG2, "pearson", "HepG2")
 plot_corr_heatmap(data_HepG2, "spearman", "HepG2")
 
 # # %%
+
+# %%

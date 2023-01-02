@@ -28,27 +28,25 @@ for key, value in MATPLOTLIB_CONFIG.items():
     plt.rcParams[key] = value
 
 # %%
-
-set_HepG2 = SampleSetECLIP(ConditionEq("Biosample name", "HepG2"))
-data_HepG2 = Metrics(set_HepG2.report)(
-    INTERACTION_SIMILARITY_STRATEGIES, add_description=False
-)
-set_K562 = SampleSetECLIP(ConditionEq("Biosample name", "K562"))
-data_K562 = Metrics(set_K562.report)(
-    INTERACTION_SIMILARITY_STRATEGIES, add_description=False
-)
+interaction_data = {
+    k: Metrics(SampleSetECLIP(ConditionEq("Biosample name", k)).report)(
+        INTERACTION_SIMILARITY_STRATEGIES, add_description=False
+    )
+    for k in ["HepG2", "K562"]
+}
 
 # %%
-data_HepG2.head()
-data_HepG2["BioSample"] = "HepG2"
-data_K562["BioSample"] = "K562"
+for biosample in interaction_data.keys():
+    interaction_data[biosample]["BioSample"] = biosample
+
 interaction_desc: pd.DataFrame = (
-    pd.concat([data_HepG2, data_K562])  # type: ignore
+    pd.concat(interaction_data.values())  # type: ignore
     .rename({"Peak N_intersections": "Peak N\_intersections"}, axis=1)
     .groupby("BioSample")
     .describe()
     .T
 )
+# %%
 
 # %%
 idx = pd.IndexSlice
@@ -57,7 +55,7 @@ interaction_desc.loc[idx[:, ["mean", "std", "min", "max"]], :].style.format(
 ).to_latex(
     os.path.join(TB_SAVEDIR, "interaction_metrics.tex"),
     column_format="lrrrrrr",
-    position="H",
+    position="htbp",
     position_float="centering",
     hrules=True,
     caption=("相互作用類似度指標の代表値", "相互作用類似度指標の代表値."),

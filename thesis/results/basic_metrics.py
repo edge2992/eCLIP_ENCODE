@@ -23,7 +23,7 @@ for key, value in MATPLOTLIB_CONFIG.items():
 
 # %% peak_gene_scatterplot
 # 遺伝子数と結合部位数の散布図を描画する
-report = load_replicateIDR_report()
+report = load_replicateIDR_report(drop_duplicates=True)
 d = []
 for index, row in report.iterrows():
     dataset = Dataset(row)

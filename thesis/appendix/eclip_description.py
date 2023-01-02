@@ -1,8 +1,10 @@
 # %%
-from dotenv import load_dotenv
 import os
 
-from src.util.bedfile import load_replicateIDR_report
+from dotenv import load_dotenv
+
+from src.eclip.sampleset import SampleSetECLIP
+from src.util.metrics.condition import ConditionEq
 
 load_dotenv()
 
@@ -15,31 +17,22 @@ if not os.path.exists(SAVEDIR):
 
 # %%
 
-df = load_replicateIDR_report()
+reports = {
+    k: SampleSetECLIP(ConditionEq("Biosample name", k)).report
+    for k in ["HepG2", "K562", "adrenal gland"]
+}
 
 # %%
-
-df.head()
-
-# %%
-df.columns
-# %%
-encode_tb = df[["Dataset", "Accession", "Biosample name", "Target label"]].copy()
-encode_tb["Dataset"] = encode_tb["Dataset"].apply(lambda x: x.split("/")[2])
-
-# %%
-encode_tb.head()
-
-# %%
-for label, grouped in encode_tb.groupby("Biosample name"):
-    grouped.sort_values("Target label")[
-        ["Dataset", "Accession", "Target label"]
-    ].rename({"Accession": "peaks"}, axis=1).to_latex(
-        os.path.join(SAVEDIR, f"encode_{label}.tex"),
+for biosample in ["HepG2", "K562", "adrenal gland"]:
+    data = reports[biosample][["Dataset", "Accession", "Target label"]].copy()
+    data["Dataset"] = data["Dataset"].apply(lambda x: x.split("/")[2])
+    print(biosample, data.shape)
+    data.rename({"Accession": "peaks"}, axis=1).to_latex(
+        os.path.join(SAVEDIR, f"encode_{biosample}.tex"),
         column_format="llll",
         longtable=True,
-        caption=f"Biosampleが{label}であるデータセットと解析ファイルのAccession番号",
-        label=f"tab:encode_{label}",
+        caption=f"Biosampleが{biosample}であるデータセットと解析ファイルのAccession番号",
+        label=f"tab:encode_{biosample}",
         index=False,
     )
 
