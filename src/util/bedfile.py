@@ -68,9 +68,15 @@ def load_report() -> pd.DataFrame:
     return report
 
 
-def load_replicateIDR_report() -> pd.DataFrame:
+def load_replicateIDR_report(drop_duplicates: bool = False) -> pd.DataFrame:
     report = load_report()
-    return report[report["Biological replicates"] == "1,2"]
+    result = report[report["Biological replicates"] == "1,2"]
+    if drop_duplicates:
+        sorted_result = result.sort_values("Date created", ascending=False)
+        return sorted_result.drop_duplicates(
+            ["Target label", "Biosample name"], keep="first"
+        ).sort_index()
+    return result
 
 
 def transform_attribute_to_dict(attribute: str) -> Dict[str, str]:
