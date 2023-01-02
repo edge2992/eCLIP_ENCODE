@@ -271,7 +271,7 @@ def test_protein_make_symmetric():
     similarity.setStrategy(BlastP())
     non_symmetric_data = similarity.executeStrategy()
 
-    similarity.setStrategy(BlastP(symmetric=True, symmetric_method="max"))
+    similarity.setStrategy(BlastP(symmetric_method="max"))
     symmetric_data = similarity.executeStrategy()
     simmetric_array = symmetric_data.to_numpy()
 

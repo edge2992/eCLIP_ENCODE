@@ -121,7 +121,10 @@ class BlastP(ProteinSimilarityStrategy):
         return subprocess.Popen(cmd_makeblastdb, shell=True)
 
     def __repr__(self) -> str:
-        return "BLASTP Bit"
+        if self.symmetric_method is None:
+            return "BLASTP Bit"
+        else:
+            return f"BLASTP Bit {self.symmetric_method}"
 
     @property
     def lower_better(self) -> bool:

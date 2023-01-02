@@ -34,7 +34,7 @@ data: pd.DataFrame = Metrics(report)(
     [
         TAPE(),
         KeywordCosine(),
-        BlastP(symmetric=True, symmetric_method="avg"),
+        BlastP(symmetric_method="avg"),
         Simpson(),
         Lift(),
         Cosine(),

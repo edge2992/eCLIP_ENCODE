@@ -5,7 +5,7 @@ def test_foldseek_score():
     from foldseek.wrapper import read_aln_tmscore
 
     similarity = ProteinSimilarity()
-    similarity.setStrategy(FoldSeekTMScore())
+    similarity.setStrategy(FoldSeekTMScore(symmetric_method=None))
     data = similarity.executeStrategy()
 
     assert similarity.strategy.loadfile is not None
@@ -42,9 +42,7 @@ def test_foldseek_score_transform():
     N_TEST = 15
     report = load_replicateIDR_report().head(N_TEST)
     similarity = ProteinSimilarity()
-    similarity.setStrategy(
-        FoldSeekTMScore(report=report, symmetric=True, symmetric_method="min")
-    )
+    similarity.setStrategy(FoldSeekTMScore(report=report, symmetric_method="min"))
     stringdb_data = similarity.executeStrategy()
     data = similarity.strategy.transform(stringdb_data)
     assert data.shape[0] == N_TEST

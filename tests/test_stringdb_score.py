@@ -108,7 +108,7 @@ def test_stringdb_homology():
     )
     print(data_converted.head())
     similarity = ProteinSimilarity()
-    similarity.setStrategy(BlastP(symmetric=True, symmetric_method="max"))
+    similarity.setStrategy(BlastP(symmetric_method="max"))
     expected = similarity.executeStrategy()
     for index, row in data_converted.iterrows():
         assert np.isclose(

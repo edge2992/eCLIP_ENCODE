@@ -19,7 +19,7 @@ def test_convert_dict_keyword():
         [
             TAPE(),
             KeywordCosine(),
-            BlastP(symmetric=True, symmetric_method="avg"),
+            BlastP(symmetric_method="avg"),
             Simpson(),
             Lift(),
             Cosine(),

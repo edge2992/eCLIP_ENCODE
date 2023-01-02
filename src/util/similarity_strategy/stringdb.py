@@ -29,13 +29,12 @@ class DirectStringScore(ProteinSimilarityStrategy):
         self,
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
-        symmetric: bool = False,
-        symmetric_method: str = "avg",
+        symmetric_method: Union[None, str] = None,
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
         fillna: Union[None, float] = 0,
         metrics: str = "score",
     ):
-        super().__init__(report, loadfile, symmetric, symmetric_method, label_method)
+        super().__init__(report, loadfile, symmetric_method, label_method)
         assert metrics in STRINGDB_SCORE_METRICS, "invalid metrics {metrics}"
         self.metrics = metrics
         self.fillna = fillna
@@ -62,7 +61,10 @@ class DirectStringScore(ProteinSimilarityStrategy):
         return {v: k for k, v in ENCODEprotein2preferredName().items()}
 
     def __repr__(self) -> str:
-        return f"STRING {self.metrics.capitalize()}"
+        if self.symmetric_method is None:
+            return f"STRING {self.metrics.capitalize()}"
+        else:
+            return f"STRING {self.metrics.capitalize()} {self.symmetric_method}"
 
     @property
     def lower_better(self) -> bool:

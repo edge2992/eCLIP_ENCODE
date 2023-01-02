@@ -139,14 +139,14 @@ def input_basicinfo(strategy: SimilarityStrategy):
 
 
 STRATEGIES = [
-    TAPE(symmetric=True),
-    BlastP(symmetric=True),
-    KeywordCosine(symmetric=True),
-    DirectStringScore(metrics="score", symmetric=True),
-    DirectStringScore(metrics="ascore", symmetric=True),
-    DirectStringScore(metrics="escore", symmetric=True),
-    DirectStringScore(metrics="tscore", symmetric=True),
-    FoldSeekTMScore(symmetric=True),
+    TAPE(symmetric_method="avg"),
+    BlastP(symmetric_method="avg"),
+    KeywordCosine(),
+    DirectStringScore(metrics="score"),
+    DirectStringScore(metrics="ascore"),
+    DirectStringScore(metrics="escore"),
+    DirectStringScore(metrics="tscore"),
+    FoldSeekTMScore(symmetric_method="avg"),
 ]
 
 

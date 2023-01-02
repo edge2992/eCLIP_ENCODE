@@ -25,18 +25,18 @@ def test_metrics_multiple():
     report = load_replicateIDR_report().head(TEST_N)
     metrics = Metrics(report)
     data_list = []
-    for strategy in [TAPE(), Jaccard(), Dice()]:
+    for strategy in [TAPE(symmetric_method=None), Jaccard(), Dice()]:
         data_list.append(metrics(strategy, add_description=False))
     data = pd.concat([metrics.description(), pd.DataFrame(data_list).T], axis=1)
 
-    multiple_metrics = metrics([TAPE(), Jaccard(), Dice()], add_description=True)
+    multiple_metrics = metrics([TAPE(symmetric_method=None), Jaccard(), Dice()], add_description=True)
 
     assert all(data == multiple_metrics)
 
     expected_tape = metrics(TAPE(), add_description=True)
     expected_dice = metrics(Dice(), add_description=True)
     for index, row in data.iterrows():
-        assert row["TAPE"] == expected_tape.loc[index, "TAPE"]  # type: ignore
+        assert row["TAPE Cosine"] == expected_tape.loc[index, "TAPE Cosine"]  # type: ignore
         assert row["Gene Dice"] == expected_dice.loc[index, "Gene Dice"]  # type: ignore
 
 
