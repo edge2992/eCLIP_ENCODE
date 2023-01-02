@@ -9,11 +9,8 @@ from dotenv import load_dotenv
 
 from src.util.metrics import ProteinMetrics
 from src.util.similarity_strategy import (
-    TAPE,
-    BlastP,
+    PROTEIN_SIMILARITY_STRATEGIES,
     DirectStringScore,
-    FoldSeekTMScore,
-    KeywordAA,
 )
 from thesis.utils.matplotlib_format import MATPLOTLIB_CONFIG
 
@@ -34,17 +31,7 @@ for key, value in MATPLOTLIB_CONFIG.items():
     plt.rcParams[key] = value
 
 # %%
-
-
-PROTEIN_SIMILARITY_STRATEGIES = [
-    BlastP(),
-    TAPE(),
-    FoldSeekTMScore(),
-    DirectStringScore(metrics="score"),
-    KeywordAA(),
-]
 data = ProteinMetrics()(PROTEIN_SIMILARITY_STRATEGIES, add_description=True)
-data = data.rename({"FoldSeek TM-Score_avg": "FoldSeek TM-Score"}, axis=1)
 
 # %%
 data.describe()
@@ -88,6 +75,11 @@ plot_corr_heatmap(data, "pearson")
 
 # %%
 
+data = ProteinMetrics()(
+    PROTEIN_SIMILARITY_STRATEGIES + [DirectStringScore(metrics="score")],
+    add_description=True,
+)
+
 desc = {}
 for col in data.columns[2:]:
     desc_col = data[data[col] != 0][col].describe()
@@ -115,7 +107,6 @@ desc[["N", "nil", "mean", "std", "max", "min"]].style.format(
     label="tab:protein_metrics",
 )
 # %%
-
 data.head()
 
 # %%

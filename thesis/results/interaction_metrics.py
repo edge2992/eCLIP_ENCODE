@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from src.eclip.sampleset import SampleSetECLIP
 from src.util.metrics import Metrics
 from src.util.metrics.condition import ConditionEq
-from src.util.similarity_strategy import Jaccard, PeakStrategy, Simpson
+from src.util.similarity_strategy import INTERACTION_SIMILARITY_STRATEGIES
 from thesis.utils.matplotlib_format import MATPLOTLIB_CONFIG
 
 load_dotenv()
@@ -30,20 +30,10 @@ for key, value in MATPLOTLIB_CONFIG.items():
 
 # %%
 
-
-strategies = [
-    Jaccard(),
-    Simpson(),
-    PeakStrategy(metrics="jaccard"),
-    PeakStrategy(metrics="union-intersection"),
-    PeakStrategy(metrics="intersection"),
-    PeakStrategy(metrics="n_intersections"),
-]
-
 set_HepG2 = SampleSetECLIP(ConditionEq("Biosample name", "HepG2"))
-data_HepG2 = Metrics(set_HepG2.report)(strategies)
+data_HepG2 = Metrics(set_HepG2.report)(INTERACTION_SIMILARITY_STRATEGIES)
 set_K562 = SampleSetECLIP(ConditionEq("Biosample name", "K562"))
-data_K562 = Metrics(set_K562.report)(strategies)
+data_K562 = Metrics(set_K562.report)(INTERACTION_SIMILARITY_STRATEGIES)
 
 # %%
 data_HepG2.head()
