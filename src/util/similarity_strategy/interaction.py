@@ -115,3 +115,27 @@ class Cosine(InteractionSimilarityStrategy):
 
     def __repr__(self) -> str:
         return "Gene Cosine"
+
+
+class Gene_N_Min(InteractionSimilarityStrategy):
+    def execute(self) -> pd.DataFrame:
+        rbp_count = self.rbp_interaction_count.to_numpy()
+        lower = np.minimum(rbp_count, rbp_count.reshape((-1, 1)))
+
+        return pd.DataFrame(
+            lower,
+            index=self.interaction_intersection.keys(),
+            columns=self.interaction_intersection.keys(),
+            dtype=float,
+        )
+
+    def __repr__(self) -> str:
+        return "Gene N Min"
+
+
+class Gene_N_Union(InteractionSimilarityStrategy):
+    def execute(self) -> pd.DataFrame:
+        return self.interaction_union
+
+    def __repr__(self) -> str:
+        return "Gene N Union"

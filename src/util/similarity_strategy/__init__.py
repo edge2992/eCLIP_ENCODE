@@ -1,5 +1,5 @@
 from .foldseek import FoldSeekTMScore
-from .interaction import Cosine, Dice, Jaccard, Lift, Simpson
+from .interaction import Cosine, Dice, Jaccard, Lift, Simpson, Gene_N_Min, Gene_N_Union
 from .interface import (
     InteractionSimilarityStrategy,
     ProteinSimilarityStrategy,
@@ -57,6 +57,8 @@ __all__ = [
     "Dice",
     "Lift",
     "Cosine",
+    "Gene_N_Min",
+    "Gene_N_Union",
     "INTERACTION_SIMILARITY_STRATEGIES",
     "PROTEIN_SIMILARITY_STRATEGIES",
     "PROTEIN_SIMILARITY_SYMMETRIC_STRATEGIES",
