@@ -39,7 +39,7 @@ class KeywordConfidence:
         return st.fisher_exact(crosstab, alternative=alternatives)
 
     def cross_tab(self, keyword: str, condition: Condition):
-        targets = self.report[condition(self.report)]
+        targets = self.report[condition(self.report)]  # type: ignore
         assert isinstance(targets, pd.DataFrame)
         target_labels = self.labels(targets)
         intersection = set(target_labels) & set(self.keywords_dict[keyword])

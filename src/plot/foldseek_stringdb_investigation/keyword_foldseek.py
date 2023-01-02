@@ -47,9 +47,9 @@ report = target_report(THRESHOLD_GENE_NUM, BIOSAMPLE)
 
 data: pd.DataFrame = Metrics(report)(
     [
-        FoldSeekTMScore(symmetric=True, symmetric_method="min"),
-        FoldSeekTMScore(symmetric=True, symmetric_method="max"),
-        FoldSeekTMScore(symmetric=True, symmetric_method="average"),
+        FoldSeekTMScore(symmetric_method="min"),
+        FoldSeekTMScore(symmetric_method="max"),
+        FoldSeekTMScore(symmetric_method="average"),
         Simpson(),
         Jaccard(),
     ],

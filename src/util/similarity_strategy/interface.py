@@ -49,15 +49,20 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
         self,
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
-        symmetric: bool = False,
-        symmetric_method: str = "avg",
+        symmetric_method: Union[None, str] = None,
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
     ):
+        """
+        symmetric_method: Noneならそのまま, avgなら平均, maxなら最大, minなら最小
+        """
         super().__init__(report, loadfile, label_method)
 
-        if symmetric_method not in ["avg", "max", "min"]:
+        if symmetric_method is not None and symmetric_method not in [
+            "avg",
+            "max",
+            "min",
+        ]:
             raise ValueError("symmetric_method must be avg, max or min")
-        self.symmetric = symmetric
         self.symmetric_method = symmetric_method
 
     def execute(self) -> pd.DataFrame:
@@ -73,7 +78,7 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
 
     def make_symmetric(self, similarities: pd.DataFrame) -> pd.DataFrame:
         values = similarities.values
-        if self.symmetric:
+        if self.symmetric_method is not None:
             values = np.stack([values, values.T])
             if self.symmetric_method == "avg":
                 values = values.sum(axis=0) / 2
@@ -128,7 +133,7 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
             return np.allclose(matrix, matrix.T, atol=1e-8)
 
         if not is_symmetric(similarities.values):
-            raise ValueError("similarities must be symmetric matrix")
+            raise ValueError("similarities must be symmetric matrix", self)
 
         labels: List[str] = self.report["Dataset"].to_list()
         return pd.DataFrame(
@@ -137,7 +142,10 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
 
     @abstractmethod
     def _protein_similarity(self) -> pd.DataFrame:
-        # DataFrameとColumnとIndexの順番は自由
+        """
+        Colmumn, IndexがProteinのGene NameであるDataFrameを返す
+        - DataFrameとColumnとIndexの順番は自由
+        """
         raise NotImplementedError()
 
     def _idmapping(self) -> Dict[str, str]:
@@ -168,6 +176,12 @@ class InteractionSimilarityStrategy(SimilarityStrategy):
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
     ):
         super().__init__(report, loadfile, label_method)
+
+    def drop_cache(self):
+        self._interaction_intersection = None
+        self._interaction_union = None
+        self._accession_genes = None
+        self._nunique_gene = None
 
     @property
     def accession_genes(self) -> Dict[str, List[str]]:

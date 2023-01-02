@@ -18,12 +18,16 @@ python-dotenv = "*"
 torch = "*"
 tape-proteins = "*"
 scikit-learn = "*"
+networkx = "*"
+gtfparse = "*"
+jinja2 = "*"
 
 [dev-packages]
 flake8 = "*"
 black = "*"
 pytest = "*"
 mypy = "*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.8"

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 
-from src.util.similarity_strategy import InteractionSimilarityStrategy
+from src.util.similarity_strategy.interface import InteractionSimilarityStrategy
 
 load_dotenv()
 
@@ -37,7 +37,7 @@ class Lift(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Lift"
+        return "Gene Lift"
 
 
 class Dice(InteractionSimilarityStrategy):
@@ -58,7 +58,7 @@ class Dice(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Dice"
+        return "Gene Dice"
 
 
 class Jaccard(InteractionSimilarityStrategy):
@@ -76,7 +76,7 @@ class Jaccard(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Jaccard"
+        return "Gene Jaccard"
 
 
 class Simpson(InteractionSimilarityStrategy):
@@ -95,7 +95,7 @@ class Simpson(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Simpson"
+        return "Gene Simpson"
 
 
 class Cosine(InteractionSimilarityStrategy):
@@ -114,4 +114,28 @@ class Cosine(InteractionSimilarityStrategy):
         )
 
     def __repr__(self) -> str:
-        return "Cosine"
+        return "Gene Cosine"
+
+
+class Gene_N_Min(InteractionSimilarityStrategy):
+    def execute(self) -> pd.DataFrame:
+        rbp_count = self.rbp_interaction_count.to_numpy()
+        lower = np.minimum(rbp_count, rbp_count.reshape((-1, 1)))
+
+        return pd.DataFrame(
+            lower,
+            index=self.interaction_intersection.keys(),
+            columns=self.interaction_intersection.keys(),
+            dtype=float,
+        )
+
+    def __repr__(self) -> str:
+        return "Gene N Min"
+
+
+class Gene_N_Union(InteractionSimilarityStrategy):
+    def execute(self) -> pd.DataFrame:
+        return self.interaction_union
+
+    def __repr__(self) -> str:
+        return "Gene N Union"

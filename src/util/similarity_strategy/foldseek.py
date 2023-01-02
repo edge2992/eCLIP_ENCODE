@@ -1,7 +1,7 @@
 from typing import Callable, Union
 import pandas as pd
 from foldseek.wrapper import read_aln_tmscore
-from src.util.similarity_strategy import ProteinSimilarityStrategy
+from src.util.similarity_strategy.interface import ProteinSimilarityStrategy
 import os
 from dotenv import load_dotenv
 
@@ -32,12 +32,11 @@ class FoldSeekTMScore(ProteinSimilarityStrategy):
         self,
         report: Union[None, pd.DataFrame] = None,
         loadfile: Union[None, str] = None,
-        symmetric: bool = False,
-        symmetric_method: str = "avg",
+        symmetric_method: Union[None, str] = None,
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
         e_value: float = 1e9,
     ):
-        super().__init__(report, loadfile, symmetric, symmetric_method, label_method)
+        super().__init__(report, loadfile, symmetric_method, label_method)
         self.e_value = e_value
         if self.loadfile is None:  # type: ignore
             self.loadfile = os.path.join(
@@ -68,7 +67,10 @@ class FoldSeekTMScore(ProteinSimilarityStrategy):
         return {v: k for k, v in idmapping_mmcif().items()}
 
     def __repr__(self) -> str:
-        return f"foldseek_tmscore_{self.symmetric_method}"
+        if self.symmetric_method is None:
+            return "FoldSeek TM-Score"
+        else:
+            return f"FoldSeek TM-Score {self.symmetric_method}"
 
     @property
     def lower_better(self) -> bool:

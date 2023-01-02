@@ -34,14 +34,14 @@ STRATEGIES = [
     PeakStrategy(metrics="union-intersection"),
     PeakStrategy(metrics="intersection"),
     PeakStrategy(metrics="n_intersections"),
-    TAPE(symmetric=True),
-    BlastP(symmetric=True),
-    KeywordCosine(symmetric=True),
-    DirectStringScore(metrics="score", symmetric=True),
-    DirectStringScore(metrics="ascore", symmetric=True),
-    DirectStringScore(metrics="escore", symmetric=True),
-    DirectStringScore(metrics="tscore", symmetric=True),
-    FoldSeekTMScore(symmetric=True),
+    TAPE(symmetric_method="avg"),
+    BlastP(symmetric_method="avg"),
+    KeywordCosine(),
+    DirectStringScore(metrics="score"),
+    DirectStringScore(metrics="ascore"),
+    DirectStringScore(metrics="escore"),
+    DirectStringScore(metrics="tscore"),
+    FoldSeekTMScore(symmetric_method="avg"),
 ]
 
 # %%
@@ -78,6 +78,11 @@ dd.replace(
 print(dd["Jaccard"].quantile(0.75))
 dd["Jaccard_STRONG"] = dd["Jaccard"] > dd["Jaccard"].quantile(0.75)
 
+# %%
+for group, grouped in dd.groupby("label"):
+    print(group)
+    print(grouped["Jaccard_STRONG"].value_counts())
+    print(grouped.head())
 # %%
 target_cols = dd.columns[6:-2]
 fig, axes = plt.subplots(len(target_cols), 1, figsize=(5, 5 * len(target_cols)))

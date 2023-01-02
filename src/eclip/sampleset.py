@@ -4,13 +4,13 @@ from src.util.bedfile import load_replicateIDR_report
 
 
 class SampleSetECLIP:
-    def __init__(self, condition: Condition):
+    def __init__(self, condition: Condition, drop_IDR_duplicates: bool = True):
         self.condition = condition
-        self.__reprot = self.__load(self.condition)
+        self.__reprot = self.__load(self.condition, drop_IDR_duplicates)
 
-    def __load(self, condition: Condition) -> pd.DataFrame:
-        report = load_replicateIDR_report()
-        result = report[condition(report)]
+    def __load(self, condition: Condition, drop_IDR_duplicates: bool) -> pd.DataFrame:
+        report = load_replicateIDR_report(drop_duplicates=drop_IDR_duplicates)
+        result = report[condition(report)]  # type: ignore
         assert isinstance(result, pd.DataFrame)
         return result
 

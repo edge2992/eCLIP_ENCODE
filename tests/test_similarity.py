@@ -66,7 +66,7 @@ def test_load_label():
     """Multiple Sequence Analysis Distanceのテスト"""
     from src.util.bedfile import load_replicateIDR_report
     from src.util.similarity_protein import ProteinSimilarity
-    from src.util.similarity_strategy import MSA
+    from src.util.similarity_strategy.protein import MSA
 
     similarity = ProteinSimilarity()
     similarity.setStrategy(MSA())
@@ -271,7 +271,7 @@ def test_protein_make_symmetric():
     similarity.setStrategy(BlastP())
     non_symmetric_data = similarity.executeStrategy()
 
-    similarity.setStrategy(BlastP(symmetric=True, symmetric_method="max"))
+    similarity.setStrategy(BlastP(symmetric_method="max"))
     symmetric_data = similarity.executeStrategy()
     simmetric_array = symmetric_data.to_numpy()
 
@@ -289,7 +289,7 @@ def test_protein_transform():
     """Datasetへの変換ができる"""
     from src.util.bedfile import load_replicateIDR_report
     from src.util.similarity_protein import ProteinSimilarity
-    from src.util.similarity_strategy import MSA
+    from src.util.similarity_strategy.protein import MSA
 
     N_TEST = 60
     report = load_replicateIDR_report().head(N_TEST)
@@ -308,7 +308,7 @@ def test_protein_transform():
 def test_flatten_tri():
     from src.util.bedfile import load_replicateIDR_report
     from src.util.similarity_protein import ProteinSimilarity
-    from src.util.similarity_strategy import MSA
+    from src.util.similarity_strategy.protein import MSA
 
     N_TEST = 60
     report = load_replicateIDR_report().head(N_TEST)

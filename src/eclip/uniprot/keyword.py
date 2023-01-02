@@ -1,4 +1,5 @@
 from typing import List
+import pandas as pd
 
 from src.util.uniprot import load_keyword_report
 
@@ -32,3 +33,15 @@ class Keyword(Singleton):
         for _, row in cls()._keywords.iterrows():
             keyword_list.extend([key.strip() for key in row["Keywords"].split(";")])
         return list(set(keyword_list))
+
+    @classmethod
+    def protein_keyword_table(cls) -> pd.DataFrame:
+        """proteinとkeywordの関係を表すDataFrameを返す"""
+        return (
+            cls()
+            ._keywords.apply(lambda row: row["Keywords"].split(";"), axis=1)
+            .reset_index()
+            .rename(columns={"From": "Protein", 0: "Keyword"})
+            .explode("Keyword")
+            .reset_index(drop=True)
+        )

@@ -18,7 +18,7 @@ def test_contigency_table(HepG2_1e3_metrics):
     import numpy as np
 
     confidence = KeywordConfidence(HepG2_1e3_metrics)
-    crosstab = confidence.cross_tab("Acetylation", ConditionGt("Jaccard", 0.3))
+    crosstab = confidence.cross_tab("Acetylation", ConditionGt("Gene Jaccard", 0.3))
     assert (crosstab.values == np.array([[25, 45], [410, 601]])).all()
     #      0    1
     # 0   25   45
@@ -30,10 +30,10 @@ def test_keyword_confidence(HepG2_1e3_metrics):
 
     confidence = KeywordConfidence(HepG2_1e3_metrics)
     oddsratio, p_value = confidence.keyword_confidence(
-        "Acetylation", ConditionGt("Jaccard", 0.3)
+        "Acetylation", ConditionGt("Gene Jaccard", 0.3)
     )
     print(p_value)
     oddsratio, p_value = confidence.keyword_confidence(
-        "Acetylation", ConditionGt("Jaccard", 0.3), "two-sided"
+        "Acetylation", ConditionGt("Gene Jaccard", 0.3), "two-sided"
     )
     print(p_value)
