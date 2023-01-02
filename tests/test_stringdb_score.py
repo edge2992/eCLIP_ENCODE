@@ -46,6 +46,22 @@ def test_stringdb_TAPE_column_index():
     assert all(stringdb_data.columns == tape_data.columns)
 
 
+def test_stringdb_qcut():
+    import pandas as pd
+    from src.util.similarity_strategy.stringdb import DirectStringScore
+    from src.util.similarity_protein import ProteinSimilarity
+
+    handler = ProteinSimilarity()
+    handler.setStrategy(DirectStringScore(metrics="score", qcut=True))
+    data = pd.Series(
+        handler.flatten_tri(handler.executeStrategy(), include_diagonal=False)
+    )
+    value_count = data.value_counts()
+    assert value_count["low-confidence"] == 10367
+    assert value_count["midium-confidence"] == 1018
+    assert value_count["high-confidence"] == 1176
+
+
 def test_stringdb_transform():
     from src.util.similarity_strategy.stringdb import DirectStringScore
     from src.util.similarity_protein import ProteinSimilarity

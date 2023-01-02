@@ -32,12 +32,14 @@ class DirectStringScore(ProteinSimilarityStrategy):
         symmetric_method: Union[None, str] = None,
         label_method: Callable[[pd.DataFrame], pd.Series] = lambda df: df["Dataset"],
         fillna: Union[None, float] = 0,
+        qcut: bool = False,
         metrics: str = "score",
     ):
         super().__init__(report, loadfile, symmetric_method, label_method)
         assert metrics in STRINGDB_SCORE_METRICS, "invalid metrics {metrics}"
         self.metrics = metrics
         self.fillna = fillna
+        self.qcut = qcut
 
     def _load(self, required_score: int = 0) -> pd.DataFrame:
 
@@ -55,7 +57,29 @@ class DirectStringScore(ProteinSimilarityStrategy):
             matrix.iloc[i, i] = 1
         if self.fillna is not None:
             matrix.fillna(self.fillna, inplace=True)
+        if self.qcut:
+            return self._qcut_matrix(matrix)
         return matrix
+
+    def _qcut_matrix(self, matrix: pd.DataFrame) -> pd.DataFrame:
+        # score < 0.4 low-confidence
+        # 0.4 <= score < 0.6 medium-confidence
+        # score >= 0.6 high-confidence
+        return pd.DataFrame(
+            pd.cut(
+                matrix.fillna(0).values.reshape(-1),
+                bins=[-0.1, 0.4, 0.6, 1],
+                labels=["low-confidence", "midium-confidence", "high-confidence"],
+            ).reshape(  # type: ignore
+                matrix.shape
+            ),
+            columns=matrix.columns,
+            index=matrix.index,
+        )
+
+    def set_qcut(self, qcut: bool) -> "DirectStringScore":
+        self.qcut = qcut
+        return self
 
     def _idmapping(self):
         return {v: k for k, v in ENCODEprotein2preferredName().items()}
