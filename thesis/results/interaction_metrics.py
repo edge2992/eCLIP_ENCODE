@@ -1,8 +1,10 @@
 # %%
 import os
+from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import seaborn as sns
 from dotenv import load_dotenv
 
@@ -29,57 +31,89 @@ for key, value in MATPLOTLIB_CONFIG.items():
     plt.rcParams[key] = value
 
 # %%
-
-set_HepG2 = SampleSetECLIP(ConditionEq("Biosample name", "HepG2"))
-data_HepG2 = Metrics(set_HepG2.report)(INTERACTION_SIMILARITY_STRATEGIES)
-set_K562 = SampleSetECLIP(ConditionEq("Biosample name", "K562"))
-data_K562 = Metrics(set_K562.report)(INTERACTION_SIMILARITY_STRATEGIES)
-
-# %%
-data_HepG2.head()
+interaction_data: Dict[str, pd.DataFrame] = {
+    k: Metrics(SampleSetECLIP(ConditionEq("Biosample name", k)).report)(
+        INTERACTION_SIMILARITY_STRATEGIES, add_description=False
+    )
+    for k in ["HepG2", "K562"]
+}  # type: ignore
 
 # %%
 
 
 def get_lim(index: str):
-    max_ = max(data_HepG2[index].max(), data_K562[index].max())
-    min_ = min(data_HepG2[index].min(), data_K562[index].min())
+    max_ = max(
+        [interaction_data[biosample][index].max() for biosample in interaction_data]
+    )
+    min_ = min(
+        [interaction_data[biosample][index].min() for biosample in interaction_data]
+    )
     return min_, max_
 
 
-xlim = get_lim("Gene Jaccard")
-ylim = get_lim("Peak Jaccard")
+def plot_jaccard_gene_scatter(
+    data: Dict[str, pd.DataFrame],
+    condition=lambda df: np.log(df["Peak N_intersections"]),
+    colorbar_label: str = "log(peak N_intersections)",
+):
+    xlim = get_lim("Gene Jaccard")
+    ylim = get_lim("Peak Jaccard")
+    plot_kws = dict(cmap="Spectral")
 
-fig, axes = plt.subplots(1, 2)
+    fig, axes = plt.subplots(1, 2)
 
-axes[0].scatter(data_HepG2["Gene Jaccard"], data_HepG2["Peak Jaccard"])
-axes[0].set_xlabel("Gene Jaccard")
-axes[0].set_ylabel("Peak Jaccard")
-axes[0].set_yscale("log")
-axes[0].set_title("HepG2")
-axes[0].set_xlim(xlim)
-axes[0].set_ylim(1e-6, ylim[1])
+    for biosample, ax in zip(data, axes):
+        mappable = ax.scatter(
+            interaction_data[biosample]["Gene Jaccard"],
+            interaction_data[biosample]["Peak Jaccard"],
+            c=condition(interaction_data[biosample]),  # type: ignore
+            **plot_kws,
+        )
+        fig.colorbar(mappable, ax=ax, label=colorbar_label)
+        ax.set_xlabel("Gene Jaccard")
+        ax.set_ylabel("Peak Jaccard")
+        ax.set_yscale("log")
+        ax.set_title(biosample)
+        ax.set_xlim(xlim)
+        ax.set_ylim(1e-6, ylim[1])
+        ax.grid(which="major", ls="-")
+    fig.subplots_adjust(wspace=0.3)
 
-axes[1].scatter(data_K562["Gene Jaccard"], data_K562["Peak Jaccard"])
-axes[1].set_xlabel("Gene Jaccard")
-axes[1].set_ylabel("Peak Jaccard")
-axes[1].set_yscale("log")
-axes[1].set_title("K562")
-axes[1].set_xlim(xlim)
-axes[1].set_ylim(1e-6, ylim[1])
-
-fig.subplots_adjust(wspace=0.3)
-fig.savefig(os.path.join(SAVEDIR, "jaccard_peak_gene_scatter.pdf"), dpi=300)
+    return fig
 
 
 # %%
-data_K562.head()
+fig = plot_jaccard_gene_scatter(
+    interaction_data,
+    condition=lambda df: np.log(df["Peak N_intersections"]),
+    colorbar_label="log(peak N_intersections)",
+)
+fig.savefig(
+    os.path.join(SAVEDIR, "jaccard_peak_gene_scatter_peak_N_intersections.pdf"), dpi=300
+)
+
+# %%
+fig = plot_jaccard_gene_scatter(
+    interaction_data,
+    lambda df: df["Peak Union-intersection"],
+    "Peak Union-intersection",
+)
+fig.savefig(os.path.join(SAVEDIR, "jaccard_peak_gene_scatter_peak_union.pdf"), dpi=300)
+
+# %%
+interaction_data["HepG2"].head()
 
 # %%
 
 
-def plot_corr_heatmap(data, method, biosample, save=True):
-    corr = data.iloc[:, 6:].corr(method)
+def plot_corr_heatmap(
+    data: Dict[str, pd.DataFrame],
+    biosample: str = "K562",
+    corr_method: str = "spearman",
+    save: bool = True,
+):
+    assert corr_method in ["pearson", "spearman"]
+    corr = data[biosample].corr(corr_method)  # type: ignore
     mask = np.zeros_like(corr)
     mask[np.triu_indices_from(mask)] = True
 
@@ -96,11 +130,11 @@ def plot_corr_heatmap(data, method, biosample, save=True):
         center=0,
         ax=ax,
     )
-    ax.set_title(f"{method.capitalize()} Correlation matrix ({biosample})")
+    ax.set_title(f"{corr_method.capitalize()} Correlation matrix ({biosample})")
 
     if save:
         fig.savefig(
-            os.path.join(SAVEDIR, f"corr_{method}_interaction_{biosample}.pdf"),
+            os.path.join(SAVEDIR, f"corr_{corr_method}_interaction_{biosample}.pdf"),
             dpi=300,
             bbox_inches="tight",
         )
@@ -108,11 +142,10 @@ def plot_corr_heatmap(data, method, biosample, save=True):
     return fig
 
 
-plot_corr_heatmap(data_K562, "pearson", "K562")
-plot_corr_heatmap(data_K562, "spearman", "K562")
-plot_corr_heatmap(data_HepG2, "pearson", "HepG2")
-plot_corr_heatmap(data_HepG2, "spearman", "HepG2")
-
-# # %%
+# %%
+plot_corr_heatmap(interaction_data, "K562", "pearson")
+plot_corr_heatmap(interaction_data, "K562", "spearman")
+plot_corr_heatmap(interaction_data, "HepG2", "pearson")
+plot_corr_heatmap(interaction_data, "HepG2", "spearman")
 
 # %%
