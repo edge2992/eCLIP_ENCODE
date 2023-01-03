@@ -58,7 +58,7 @@ def plot_jaccard_gene_scatter(
 ):
     xlim = get_lim("Gene Jaccard")
     ylim = get_lim("Peak Jaccard")
-    plot_kws = dict(cmap="Spectral")
+    plot_kws = dict(cmap="magma")
 
     fig, axes = plt.subplots(1, 2)
 
