@@ -43,7 +43,7 @@ protein_data.head()
 def plot_hist_protein(
     data: pd.DataFrame,
     metrics_col: str = "TAPE Cosine",
-    plot_kws: Dict = dict(bins=90),
+    plot_kws: Dict = dict(bins=90, rwidth=0.85),
     x_log: bool = False,
     save: bool = False,
 ):
@@ -52,9 +52,7 @@ def plot_hist_protein(
     if x_log:
         max_ = plot_data.max()
         min_ = plot_data[plot_data != 0].min()
-        plot_kws = dict(
-            bins=np.logspace(np.log10(min_), np.log10(max_), plot_kws["bins"])
-        )
+        plot_kws["bins"] = np.logspace(np.log10(min_), np.log10(max_), plot_kws["bins"])
 
     fig, ax = plt.subplots(1, 1, figsize=(16, 4))
     ax.hist(
@@ -79,7 +77,7 @@ for col in protein_data.columns:
     plot_hist_protein(
         protein_data,
         metrics_col=col,
-        plot_kws=dict(bins=90),
+        plot_kws=dict(bins=90, rwidth=0.70, color="tab:orange"),
         x_log=col in ["BLASTP Bit avg"],
         save=True,
     )
