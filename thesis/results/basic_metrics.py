@@ -39,7 +39,9 @@ data = pd.DataFrame(d)
 # %% plot
 
 fig, ax = plt.subplots(1, 1)
-sns.scatterplot(data, x="gene", y="peak", hue="biosample", ax=ax, s=60)
+sns.scatterplot(
+    data, x="gene", y="peak", hue="biosample", ax=ax, s=80, edgecolor="none"
+)
 ax.set_xlabel("number of unique genes")
 ax.set_ylabel("number of unique peaks")
 ax.set_title(
