@@ -64,6 +64,7 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
         ]:
             raise ValueError("symmetric_method must be avg, max or min")
         self.symmetric_method = symmetric_method
+        self.dtype = np.float32
 
     def execute(self) -> pd.DataFrame:
         similarities = self._protein_similarity()
@@ -120,7 +121,7 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
             # https://github.com/scipy/scipy/blob/v1.9.3/scipy/spatial/distance.py#L1943-L2246
             n = len(label)
             out_size = (n * (n - 1)) // 2
-            dm = np.empty(out_size, dtype=np.float32)
+            dm = np.empty(out_size, dtype=self.dtype)
             k = 0
             for i in range(n - 1):
                 for j in range(i + 1, n):
@@ -130,7 +131,10 @@ class ProteinSimilarityStrategy(SimilarityStrategy):
 
         def is_symmetric(matrix: np.ndarray) -> bool:
             """対称行列である"""
-            return np.allclose(matrix, matrix.T, atol=1e-8)
+            if self.dtype == np.float32:
+                return np.allclose(matrix, matrix.T, atol=1e-8)
+            else:
+                return np.all(matrix == matrix.T)  # type: ignore
 
         if not is_symmetric(similarities.values):
             raise ValueError("similarities must be symmetric matrix", self)
