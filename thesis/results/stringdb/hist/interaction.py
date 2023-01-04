@@ -84,8 +84,18 @@ for biosample in COMPARE_REPORT_SET:
                 DirectStringScore(metrics="score", qcut=True),
             ],
             add_description=False,
+        ).replace(
+            {
+                "STRING Score": {
+                    "h": "high-confidence",
+                    "m": "midium-confidence",
+                    "l": "low-confidence",
+                }
+            },
         )
+
         assert isinstance(data, pd.DataFrame)
+
         for strategies in INTERACTION_SIMILARITY_STRATEGIES:
             fig = plot_hist_interaction_stringdb(
                 data,
