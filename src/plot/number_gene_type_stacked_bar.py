@@ -57,5 +57,3 @@ fig.suptitle(
 fig.savefig(
     os.path.join(PROJECT_PATH, "src/plot/img", "number_gene_type_stacked_bar.png")
 )
-
-# %%

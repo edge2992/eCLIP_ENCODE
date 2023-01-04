@@ -1,4 +1,5 @@
 import pandas as pd
+from typing import List
 from src.util.metrics.condition import Condition
 from src.util.bedfile import load_replicateIDR_report
 
@@ -6,7 +7,7 @@ from src.util.bedfile import load_replicateIDR_report
 class SampleSetECLIP:
     def __init__(self, condition: Condition, drop_IDR_duplicates: bool = True):
         self.condition = condition
-        self.__reprot = self.__load(self.condition, drop_IDR_duplicates)
+        self.__report = self.__load(self.condition, drop_IDR_duplicates)
 
     def __load(self, condition: Condition, drop_IDR_duplicates: bool) -> pd.DataFrame:
         report = load_replicateIDR_report(drop_duplicates=drop_IDR_duplicates)
@@ -16,7 +17,11 @@ class SampleSetECLIP:
 
     @property
     def report(self):
-        return self.__reprot
+        return self.__report
+
+    @property
+    def proteins(self) -> List:
+        return list(self.__report["Target label"].unique())
 
     def __repr__(self) -> str:
         return f"{self.condition}".replace("=", "").replace(" ", "_")
@@ -25,7 +30,6 @@ class SampleSetECLIP:
 if __name__ == "__main__":
     from src.util.metrics.condition import ConditionAnd, ConditionEq
     from src.eclip.encodecondition import GeneNumberGteCondition
-    from typing import List
 
     conditions: List[Condition] = [
         ConditionEq("Biosample name", "HepG2"),

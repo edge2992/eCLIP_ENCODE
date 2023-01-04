@@ -1,5 +1,6 @@
 from typing import Callable, Union
 import pandas as pd
+import numpy as np
 
 from src.util.similarity_strategy.interface import ProteinSimilarityStrategy
 from src.util.download.stringdb import (
@@ -40,6 +41,7 @@ class DirectStringScore(ProteinSimilarityStrategy):
         self.metrics = metrics
         self.fillna = fillna
         self.qcut = qcut
+        self.dtype = np.float64 if not qcut else str
 
     def _load(self, required_score: int = 0) -> pd.DataFrame:
 
@@ -79,6 +81,7 @@ class DirectStringScore(ProteinSimilarityStrategy):
 
     def set_qcut(self, qcut: bool) -> "DirectStringScore":
         self.qcut = qcut
+        self.dtype = np.float64 if not qcut else str
         return self
 
     def _idmapping(self):

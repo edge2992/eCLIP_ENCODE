@@ -1,14 +1,21 @@
 # %%
 import os
+from typing import Dict
 
 import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
 from dotenv import load_dotenv
 
 from src.eclip.sampleset import SampleSetECLIP
 from src.util.metrics import Metrics
 from src.util.metrics.condition import ConditionEq
-from src.util.similarity_strategy import Gene_N_Min, Gene_N_Union, Jaccard, Simpson
+from src.util.similarity_strategy import (
+    Gene_N_Max,
+    Gene_N_Min,
+    Gene_N_Union,
+    Jaccard,
+    Simpson,
+)
 from thesis.utils.matplotlib_format import MATPLOTLIB_CONFIG
 
 load_dotenv()
@@ -34,9 +41,10 @@ METRICS = [
     Simpson(),
     Gene_N_Union(),
     Gene_N_Min(),
+    Gene_N_Max(),
 ]
 
-interaction_data = {
+interaction_data: Dict[str, pd.DataFrame] = {
     k: Metrics(SampleSetECLIP(ConditionEq("Biosample name", k)).report)(
         METRICS, add_description=False  # type: ignore
     )
@@ -44,33 +52,69 @@ interaction_data = {
 }
 
 # %%
-for biosample in interaction_data.keys():
+
+
+def plot_interaction_gene_n_scatter(
+    data: Dict[str, pd.DataFrame],
+    biosample: str = "HepG2",
+    x: str = "Gene N Min",
+    y: str = "Gene N Union",
+    save: bool = True,
+):
+    plot_data: pd.DataFrame = data[biosample]
+    plot_kws = dict(cmap="magma")
     fig, axes = plt.subplots(1, 2)
     for hue, ax in zip(["Gene Jaccard", "Gene Simpson"], axes):
-        sns.scatterplot(
-            interaction_data[biosample],
-            y="Gene N Union",
-            x="Gene N Min",
-            ax=ax,
-            hue=hue,
-            edgecolor="none",
-        )
-        handlers, labels = ax.get_legend_handles_labels()
-        # ax.legend(handlers, labels, loc="upper left", bbox_to_anchor=(1, 1))
+        mappable = ax.scatter(plot_data[x], plot_data[y], c=plot_data[hue], **plot_kws)
+        fig.colorbar(mappable, ax=ax, label=hue)
+        ax.set_xlabel(x)
+        ax.set_ylabel(y)
         ax.set_xscale("log")
         ax.grid(which="major", ls="-")
-        ax.set_xlim(30, 5200)
-        ax.set_ylim(-1, 8000)
-        # TODO scale
+        # for future: 細胞株を両方表示する場合は、軸を揃える
+        # ax.set_xlim(30, 5200)
+        # ax.set_ylim(-1, 8000)
     fig.subplots_adjust(wspace=0.30)
-    fig.savefig(
-        os.path.join(SAVEDIR, f"interaction_union_min_{biosample}.pdf"),
-        bbox_inches="tight",
-        dpi=300,
-    )
+    if save:
+        fig.savefig(
+            os.path.join(
+                SAVEDIR,
+                f"interaction_{'_'.join(x.split())}_{'_'.join(y.split())}_{biosample}.pdf",
+            ),
+            bbox_inches="tight",
+            dpi=300,
+        )
+
 
 # %%
 for biosample in interaction_data.keys():
-    print(interaction_data[biosample].max())
+    plot_interaction_gene_n_scatter(
+        interaction_data,
+        biosample=biosample,
+        x="Gene N Min",
+        y="Gene N Union",
+        save=True,
+    )
+
+
+# %%
+for biosample in interaction_data.keys():
+    plot_interaction_gene_n_scatter(
+        interaction_data,
+        biosample=biosample,
+        x="Gene N Max",
+        y="Gene N Union",
+        save=True,
+    )
+# %%
+
+for biosample in interaction_data.keys():
+    plot_interaction_gene_n_scatter(
+        interaction_data,
+        biosample=biosample,
+        x="Gene N Min",
+        y="Gene N Max",
+        save=True,
+    )
 
 # %%
