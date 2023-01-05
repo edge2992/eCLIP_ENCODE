@@ -40,6 +40,17 @@ class ConditionLt(Condition):
         return f"{self.hue} < {self.threshold}"
 
 
+class ConditionLte(Condition):
+    def __init__(self, hue: str, threshold: float):
+        super().__init__(hue, threshold)
+
+    def __call__(self, data: pd.DataFrame) -> pd.Series:
+        return data[self.hue] <= self.threshold
+
+    def __repr__(self):
+        return f"{self.hue} <= {self.threshold}"
+
+
 class ConditionAnd(Condition):
     def __init__(self, conditions: List[Condition]):
         self.conditions = conditions

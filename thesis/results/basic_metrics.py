@@ -36,6 +36,9 @@ for index, row in report.iterrows():
         }
     )
 data = pd.DataFrame(d)
+
+# %% タンパク質の件数
+report["Target label"].nunique()
 # %% plot
 
 fig, ax = plt.subplots(1, 1)
