@@ -72,7 +72,7 @@ for biosample in COMPARE_REPORT_SET:
                 TB_SAVEDIR,
                 f"metrics_table_string_interaction_{biosample}_{condition}.tex",
             ),
-            position="htbp",
+            position="tbp",
             position_float="centering",
             hrules=True,
             caption=tex_escape(
@@ -130,7 +130,7 @@ for biosample in ["HepG2", "K562"]:
         {"p-value": "{:.2e}", "U1": "{:.2e}"}, escape="latex"
     ).to_latex(
         os.path.join(TB_SAVEDIR, f"mannwhitneyu_{biosample}.tex"),
-        position="htbp",
+        position="tbp",
         position_float="centering",
         hrules=True,
         caption=tex_escape(f"Mann-Whitneyの片側U検定 ({biosample})"),

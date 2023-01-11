@@ -39,10 +39,10 @@ pd.DataFrame([data[col].value_counts() for col in data.columns], dtype=int).fill
 ].astype(int).style.format("{:,d}").to_latex(
     os.path.join(TB_SAVEDIR, "protein_stringdb_categorical_metrics.tex"),
     column_format="lrrr",
-    position="H",
+    position="tbp",
     position_float="centering",
     hrules=True,
-    caption="Protein STRINGDB categorical metrics",
+    caption="STRINGスコアをカテゴリーに変換した時の各カテゴリーに属するRBPの件数",
     label="tab:stringdb_categorical_metrics",
 )
 

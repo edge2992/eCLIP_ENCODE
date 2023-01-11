@@ -65,7 +65,7 @@ sampledata_num_table.style.format("{:,d}").format_index(
 ).format_index(escape="latex", axis=0).to_latex(
     os.path.join(TB_SAVEDIR, "stringdb_compareset_count.tex"),
     column_format="llrrr",
-    position="htbp",
+    position="tbp",
     position_float="centering",
     hrules=True,
     caption="比較セットごとのタンパク質相互作用のペアの数",

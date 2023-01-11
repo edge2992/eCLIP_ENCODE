@@ -158,7 +158,7 @@ pd.DataFrame(
 ).style.format("{:,d}").to_latex(
     os.path.join(TB_SAVEDIR, "graph_metrics.tex"),
     column_format="lrr",
-    position="htbp",
+    position="tbp",
     position_float="centering",
     hrules=True,
     caption="タンパク質とRNAの相互作用のグラフの基本的な統計量",

@@ -75,7 +75,7 @@ for biosample in COMPARE_REPORT_SET:
         ).to_latex(
             os.path.join(TB_SAVEDIR, f"fisher_test_jaccard_{biosample}_{key}.tex"),
             column_format="lrr",
-            position="htbp",
+            position="tbp",
             position_float="centering",
             hrules=True,
             caption=f"キーワードに対するFisherの正確性検定の結果 ({latex_key} ({biosample})). p-valueの上位10件を表示した。",
@@ -118,7 +118,7 @@ pd.DataFrame(condition_a_count).T.reindex(columns=[True, False]).rename(
 ).to_latex(
     os.path.join(TB_SAVEDIR, "condition_a_count.tex"),
     column_format="llrr",
-    position="htbp",
+    position="tbp",
     position_float="centering",
     hrules=True,
     caption="各データセットにおける相互作用スコアが高い (Gene Jaccard Indexが0.2より大きい) データの数",

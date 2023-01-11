@@ -55,7 +55,7 @@ interaction_desc.loc[idx[:, ["mean", "std", "min", "max"]], :].style.format(
 ).to_latex(
     os.path.join(TB_SAVEDIR, "interaction_metrics.tex"),
     column_format="lrrrrrr",
-    position="htbp",
+    position="tbp",
     position_float="centering",
     hrules=True,
     caption=("相互作用類似度指標の代表値", "相互作用類似度指標の代表値."),
