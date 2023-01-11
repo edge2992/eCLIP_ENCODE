@@ -78,7 +78,7 @@ for biosample in COMPARE_REPORT_SET:
             caption=tex_escape(
                 f"STRING Scoreごとの相互作用類似指標の代表値 ({condition} ({biosample}))"
             ),
-            label="tab:metrics_string_interaction_{biosample}_{condition}",
+            label=f"tab:metrics_string_interaction_{biosample}_{condition}",
         )
 # %%
 # 正規分布の検定
