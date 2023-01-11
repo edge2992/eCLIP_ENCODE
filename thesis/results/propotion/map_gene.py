@@ -50,7 +50,7 @@ for biosample in ["HepG2", "K562"]:
         position="tbp",
         position_float="centering",
         hrules=True,
-        caption=f"bedtools intersectによって変換された後の遺伝子の件数と割合 ({biosample})",
+        caption=f"bedtools intersectによって変換された後の遺伝子の種類ごとの件数と割合 ({biosample})",
         label=f"tab:gene_type_{biosample}",
     )
 # %%

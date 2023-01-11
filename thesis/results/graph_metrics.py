@@ -57,7 +57,9 @@ for node_type in ["Protein", "RNA"]:
     ax.legend()
     ax.grid(which="major", ls="-")
     fig.savefig(
-        os.path.join(SAVEDIR, f"hist_degree_distribution_{node_type}.pdf"), dpi=300
+        os.path.join(SAVEDIR, f"hist_degree_distribution_{node_type}.pdf"),
+        dpi=300,
+        bbox_inches="tight",
     )
 
 
