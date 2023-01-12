@@ -55,7 +55,7 @@ protein_metrics_table
 
 protein_metrics_table.style.format_index(escape="latex", axis=1).to_latex(
     os.path.join(SAVEDIR, "compareset_protein_number.tex"),
-    position="htbp",
+    position="tbp",
     position_float="centering",
     hrules=True,
     caption="相互作用するRNA (遺伝子) の種類数で分割した場合のタンパク質の種類数",
@@ -173,7 +173,7 @@ metrics_table.style.format(
     }
 ).format_index(escape="latex", axis=1).format_index(escape="latex", axis=0).to_latex(
     os.path.join(SAVEDIR, "compareset_metrics_table.tex"),
-    position="htbp",
+    position="tbp",
     position_float="centering",
     hrules=True,
     caption="比較セットごとのタンパク質の相互作用の統計量",

@@ -34,7 +34,7 @@ def make_edges(report: pd.DataFrame) -> pd.DataFrame:
     for _, row in report.iterrows():
         dataset = Dataset(row)
         d.append({"Protein": dataset.protein, "RNA": dataset.genes})
-    return pd.DataFrame(d).explode("RNA").reset_index()
+    return pd.DataFrame(d).explode("RNA").reset_index(drop=True)
 
 
 # %%
@@ -44,6 +44,24 @@ set_K562 = SampleSetECLIP(ConditionEq("Biosample name", "K562"))
 
 edges_HepG2 = make_edges(set_HepG2.report)
 edges_K562 = make_edges(set_K562.report)
+
+# %%
+plot_kws = dict(bins=40)
+edges = {"HepG2": edges_HepG2, "K562": edges_K562}
+for node_type in ["Protein", "RNA"]:
+    degrees = [edge.value_counts(node_type) for edge in edges.values()]
+    fig, ax = plt.subplots(1, 1, figsize=(16, 4))
+    ax.hist(degrees, **plot_kws, label=list(edges.keys()))  # type: ignore
+    ax.set_xlabel(f"Degree of {node_type}")
+    ax.set_ylabel(f"Frequency of {node_type}")
+    ax.legend()
+    ax.grid(which="major", ls="-")
+    fig.savefig(
+        os.path.join(SAVEDIR, f"hist_degree_distribution_{node_type}.pdf"),
+        dpi=300,
+        bbox_inches="tight",
+    )
+
 
 # %%
 
@@ -127,9 +145,9 @@ fig.savefig(os.path.join(SAVEDIR, "degree_distribution.pdf"), dpi=300)
 # %%
 def graph_metrics(edges: pd.DataFrame):
     return {
-        "Edges": len(edges),
-        "Protein Nodes": edges["Protein"].nunique(),
-        "RNA Nodes": edges["RNA"].nunique(),
+        "RNA結合タンパク質": edges["Protein"].nunique(),
+        "RNA (遺伝子)": edges["RNA"].nunique(),
+        "相互作用件数": len(edges),
     }
 
 
@@ -142,10 +160,10 @@ pd.DataFrame(
 ).style.format("{:,d}").to_latex(
     os.path.join(TB_SAVEDIR, "graph_metrics.tex"),
     column_format="lrr",
-    position="htbp",
+    position="tbp",
     position_float="centering",
     hrules=True,
-    caption="Graph metrics for HepG2 and K562.",
+    caption="タンパク質とRNAの相互作用のグラフの基本的な統計量",
     label="tab:graph_metrics",
 )
 

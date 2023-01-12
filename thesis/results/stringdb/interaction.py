@@ -1,6 +1,7 @@
 # %%
 import os
 import pandas as pd
+import scipy.stats as stats
 
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
@@ -52,7 +53,9 @@ for biosample in COMPARE_REPORT_SET:
             {"Gene Jaccard": ["count", "mean", "std"], "Gene Simpson": ["mean", "std"]}
         )
 
-        metrics_table.style.format(
+        metrics_table.reindex(
+            index=["high-confidence", "midium-confidence", "low-confidence"]
+        ).style.format(
             {
                 ("Gene Jaccard", "mean"): "{:.2e}",
                 ("Gene Jaccard", "std"): "{:.2e}",
@@ -60,22 +63,94 @@ for biosample in COMPARE_REPORT_SET:
                 ("Gene Simpson", "std"): "{:.2e}",
                 ("Gene Jaccard", "count"): "{:,d}",
             }
-        ).format_index(escape="latex", axis=1).format_index(
+        ).format_index(
+            escape="latex", axis=1
+        ).format_index(
             escape="latex", axis=0
         ).to_latex(
             os.path.join(
                 TB_SAVEDIR,
                 f"metrics_table_string_interaction_{biosample}_{condition}.tex",
             ),
-            position="htbp",
+            position="tbp",
             position_float="centering",
             hrules=True,
             caption=tex_escape(
-                f"STRING Scoreで分けた時の相互作用類似指標の代表値 ({condition} ({biosample}))"
+                f"STRING Scoreごとの相互作用類似指標の代表値 ({condition} ({biosample}))"
             ),
-            label="tab:metrics_string_interaction_{biosample}_{condition}",
+            label=f"tab:metrics_string_interaction_{biosample}_{condition}",
         )
+# %%
+# 正規分布の検定
 
+
+stats_result = []
+for biosample in COMPARE_REPORT_SET:
+    for condition in COMPARE_REPORT_SET[biosample]:
+        sampleset = COMPARE_REPORT_SET[biosample][condition]
+
+        data: pd.DataFrame = Metrics(sampleset.report)(  # type: ignore
+            [
+                *INTERACTION_SIMILARITY_STRATEGIES,
+                DirectStringScore(metrics="score", qcut=True),
+            ],
+            add_description=False,
+        ).replace(
+            {
+                "STRING Score": {
+                    "h": "high-confidence",
+                    "m": "midium-confidence",
+                    "l": "low-confidence",
+                }
+            },
+        )  # type: ignore
+        # ManWhitneyU
+        for metrics in ["Gene Jaccard", "Gene Simpson"]:
+            for target_label in ["high-confidence", "midium-confidence"]:
+                A = data[data["STRING Score"] == target_label][metrics]
+                B = data[data["STRING Score"] == "low-confidence"][metrics]
+                print(len(A), len(B))
+                U1, p = stats.mannwhitneyu(A, B, alternative="greater")
+                stats_result.append(
+                    {
+                        "biosample": biosample,
+                        "protein": condition,
+                        "A": target_label,
+                        "B": "low-confidence",
+                        "metrics": metrics,
+                        "p-value": p,
+                        "U1": U1,
+                    }
+                )
+data_stats = pd.DataFrame(stats_result)
+# %%
+
+
+def color_statistical_significance(
+    pvalue: float, color: str = "red", threshold: float = 0.05
+) -> str:
+    if pvalue < threshold:
+        return "color: {red}"
+    else:
+        return "color: {black}"
+
+
+for biosample in ["HepG2", "K562"]:
+    data_stats[data_stats["biosample"] == biosample].drop(
+        "biosample", axis=1
+    ).style.applymap(color_statistical_significance, subset=["p-value"]).hide(
+        axis="index"
+    ).format(
+        {"p-value": "{:.2e}", "U1": "{:.2e}"}, escape="latex"
+    ).to_latex(
+        os.path.join(TB_SAVEDIR, f"mannwhitneyu_{biosample}.tex"),
+        position="tbp",
+        position_float="centering",
+        hrules=True,
+        caption=tex_escape(f"Mann-Whitneyの片側U検定 ({biosample}). p-value < 0.05を赤色で示す."),
+        label=f"tab:mannwhitneyu_{biosample}",
+    )
+# print(stats.shapiro(data["Gene Jaccard"]))
 
 # %%
 # heavy no meaning
@@ -83,7 +158,7 @@ condition = "Protein_GTE_1000"
 
 for biosample in ["HepG2", "K562"]:
     sampleset = COMPARE_REPORT_SET[biosample][condition]
-    data: pd.DataFrame = Metrics(sampleset.report)(
+    data: pd.DataFrame = Metrics(sampleset.report)(  # type: ignore
         [
             *INTERACTION_SIMILARITY_STRATEGIES,
             DirectStringScore(metrics="score", qcut=True),
