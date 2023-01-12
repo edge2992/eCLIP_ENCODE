@@ -83,6 +83,7 @@ for biosample in COMPARE_REPORT_SET:
 # %%
 # 正規分布の検定
 
+
 stats_result = []
 for biosample in COMPARE_REPORT_SET:
     for condition in COMPARE_REPORT_SET[biosample]:
@@ -123,17 +124,30 @@ for biosample in COMPARE_REPORT_SET:
                 )
 data_stats = pd.DataFrame(stats_result)
 # %%
+
+
+def color_statistical_significance(
+    pvalue: float, color: str = "red", threshold: float = 0.05
+) -> str:
+    if pvalue < threshold:
+        return "color: {red}"
+    else:
+        return "color: {black}"
+
+
 for biosample in ["HepG2", "K562"]:
     data_stats[data_stats["biosample"] == biosample].drop(
         "biosample", axis=1
-    ).style.hide(axis="index").format(
+    ).style.applymap(color_statistical_significance, subset=["p-value"]).hide(
+        axis="index"
+    ).format(
         {"p-value": "{:.2e}", "U1": "{:.2e}"}, escape="latex"
     ).to_latex(
         os.path.join(TB_SAVEDIR, f"mannwhitneyu_{biosample}.tex"),
         position="tbp",
         position_float="centering",
         hrules=True,
-        caption=tex_escape(f"Mann-Whitneyの片側U検定 ({biosample})"),
+        caption=tex_escape(f"Mann-Whitneyの片側U検定 ({biosample}). p-value < 0.05を赤色で示す."),
         label=f"tab:mannwhitneyu_{biosample}",
     )
 # print(stats.shapiro(data["Gene Jaccard"]))
